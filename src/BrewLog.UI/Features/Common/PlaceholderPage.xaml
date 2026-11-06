@@ -1,0 +1,25 @@
+<UserControl x:Class="BrewLog.UI.Features.Common.PlaceholderPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top"
+                   Style="{StaticResource PageTitle}"
+                   Margin="{StaticResource Gap.Bottom.24}"
+                   Text="{Binding Title}" />
+
+        <ContentControl Style="{StaticResource Card}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ContentControl Style="{StaticResource IconBadge.Large}"
+                                Margin="{StaticResource Gap.Bottom.24}"
+                                Content="{Binding Glyph}" />
+                <TextBlock Style="{StaticResource SectionTitle}"
+                           HorizontalAlignment="Center"
+                           Margin="{StaticResource Gap.Bottom.8}"
+                           Text="Розділ у розробці" />
+                <TextBlock Style="{StaticResource PageSubtitle}"
+                           HorizontalAlignment="Center"
+                           Text="{Binding Description}" />
+            </StackPanel>
+        </ContentControl>
+    </DockPanel>
+</UserControl>

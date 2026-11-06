@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BrewLog.Data/BrewLog.Data.csproj" />
+    <Project Path="src/BrewLog.Domain/BrewLog.Domain.csproj" />
+    <Project Path="src/BrewLog.UI/BrewLog.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BrewLog.Tests/BrewLog.Tests.csproj" />
+  </Folder>
+</Solution>

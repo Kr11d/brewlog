@@ -1,0 +1,25 @@
+# Збірка
+bin/
+obj/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# Тести й покриття
+TestResults/
+*.coverage
+coverage*.xml
+
+# Файли, які створює застосунок
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.log
+
+# Локальні налаштування агента
+.claude/settings.local.json
