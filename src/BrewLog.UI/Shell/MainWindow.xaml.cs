@@ -2,11 +2,12 @@ using System.Windows;
 
 namespace BrewLog.UI.Shell;
 
-/// <summary>Тимчасове головне вікно; оболонку з меню робить промт B2.</summary>
+/// <summary>Головне вікно: бічне меню й область поточної сторінки.</summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
     }
 }

@@ -1,0 +1,93 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <FontFamily x:Key="Font.Text">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="Font.Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <FontFamily x:Key="Font.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <sys:Double x:Key="FontSize.Tiny">11</sys:Double>
+    <sys:Double x:Key="FontSize.Small">13</sys:Double>
+    <sys:Double x:Key="FontSize.Body">15</sys:Double>
+    <sys:Double x:Key="FontSize.Icon">18</sys:Double>
+    <sys:Double x:Key="FontSize.Section">20</sys:Double>
+    <sys:Double x:Key="FontSize.Logo">22</sys:Double>
+    <sys:Double x:Key="FontSize.IconBadge">24</sys:Double>
+    <sys:Double x:Key="FontSize.Title">30</sys:Double>
+    <sys:Double x:Key="FontSize.BigNumber">34</sys:Double>
+    <sys:Double x:Key="FontSize.IconLarge">40</sys:Double>
+
+    <!-- Гліфи, якими користується сама тема. Гліфи розділів меню — у Shell/SectionCatalog. -->
+    <sys:String x:Key="Glyph.Info">&#xE946;</sys:String>
+    <sys:String x:Key="Glyph.Error">&#xE783;</sys:String>
+    <sys:String x:Key="Glyph.Question">&#xE9CE;</sys:String>
+    <sys:String x:Key="Glyph.ChevronLeft">&#xE76B;</sys:String>
+    <sys:String x:Key="Glyph.ChevronRight">&#xE76C;</sys:String>
+    <sys:String x:Key="Glyph.ChevronUp">&#xE70E;</sys:String>
+    <sys:String x:Key="Glyph.ChevronDown">&#xE70D;</sys:String>
+    <sys:String x:Key="Glyph.Calendar">&#xE787;</sys:String>
+    <sys:String x:Key="Glyph.SignOut">&#xF3B1;</sys:String>
+
+    <!--
+      Стилі тексту. PageTitle, SectionTitle, Body і BigNumber не задають колір: він успадковується,
+      тому на DocCard ці стилі автоматично стають білими.
+    -->
+    <Style x:Key="PageTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Title}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="PageSubtitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+        <Setter Property="Foreground" Value="{StaticResource Text.Secondary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SectionTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Section}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="Body" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="Body.Strong" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="Caption" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
+        <Setter Property="Foreground" Value="{StaticResource Text.Secondary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="Caption.OnAccent" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Foreground" Value="{StaticResource Text.OnAccent.Muted}" />
+    </Style>
+
+    <Style x:Key="BigNumber" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.BigNumber}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="LogoText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Logo}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="Icon" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Icon}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+</ResourceDictionary>

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Threading;
 using BrewLog.Data.Infrastructure;
-using BrewLog.UI.Shell;
+using BrewLog.UI.Services;
 using QuestPDF.Infrastructure;
 
 namespace BrewLog.UI;
@@ -29,9 +29,7 @@ public partial class App : Application
 
         var services = new AppServices(AppPaths.DefaultDatabasePath);
         services.InitializeDatabase();
-
-        MainWindow = new MainWindow();
-        MainWindow.Show();
+        services.Windows.ShowMainWindow();
     }
 
     private static void ApplyUkrainianCulture()
@@ -71,16 +69,20 @@ public partial class App : Application
         }
     }
 
-    private static void ReportFailure(object error)
+    private void ReportFailure(object error)
     {
         WriteToLog(error);
 
-        // Системне вікно лише тому, що стилізований DialogService з'явиться в B2.
-        MessageBox.Show(
-            $"Сталася непередбачена помилка.\n\nПодробиці записано в журнал:\n{AppPaths.LogsDirectory}",
-            "BrewLog",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
+        var message = $"Сталася непередбачена помилка.\n\nПодробиці записано в журнал:\n{AppPaths.LogsDirectory}";
+        try
+        {
+            Dispatcher.Invoke(() => new DialogService().ShowError(message));
+        }
+        catch (Exception)
+        {
+            // Якщо збій зачепив тему чи XAML, стилізований діалог теж не відкриється: лишається системне вікно.
+            MessageBox.Show(message, "BrewLog", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private static void WriteToLog(object error)

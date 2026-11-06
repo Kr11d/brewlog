@@ -1,6 +1,9 @@
 using System.IO;
 using System.Windows;
-using BrewLog.UI.Shell;
+using System.Windows.Controls;
+using System.Windows.Interop;
+using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Common;
 
 namespace BrewLog.UI;
 
@@ -13,12 +16,25 @@ public static class SmokeRunner
     public const string Argument = "--smoke";
 
     private static readonly TimeSpan WatchdogTimeout = TimeSpan.FromSeconds(60);
+    private static readonly Size LayoutSize = new(1280, 800);
 
-    /// <summary>Усе, що перевіряє smoke: кожне нове вікно чи сторінку додавайте сюди.</summary>
-    private static IReadOnlyList<(string Name, Func<object> Create)> Targets(AppServices services) =>
-    [
-        ("MainWindow", () => new MainWindow()),
-    ];
+    /// <summary>Усе, що перевіряє smoke: кожне нове вікно додавайте сюди. Сторінки беруться з NavigationService самі.</summary>
+    private static IEnumerable<(string Name, Func<object> Create)> Targets(AppServices services)
+    {
+        yield return ("MainWindow", () => services.Windows.CreateMainWindow());
+
+        yield return ("MessageDialog: інформація", () => new MessageDialog(
+            new MessageDialogViewModel(MessageKind.Info, "Заголовок", "Текст повідомлення", "Зрозуміло")));
+        yield return ("MessageDialog: помилка", () => new MessageDialog(
+            new MessageDialogViewModel(MessageKind.Error, "Заголовок", "Текст повідомлення", "Закрити")));
+        yield return ("MessageDialog: підтвердження", () => new MessageDialog(
+            new MessageDialogViewModel(MessageKind.Confirm, "Заголовок", "Текст повідомлення", "Так", "Ні")));
+
+        foreach (var section in Enum.GetValues<AppSection>())
+        {
+            yield return ($"Сторінка розділу {section}", () => CreatePage(services, section));
+        }
+    }
 
     /// <summary>Виконує перевірку, пише лог у %TEMP%/brewlog-smoke.log і завершує процес.</summary>
     public static void Run(Application app)
@@ -76,7 +92,9 @@ public static class SmokeRunner
     {
         try
         {
-            (create() as Window)?.Close();
+            var created = create();
+            ApplyTemplates(created);
+            (created as Window)?.Close();
             log.WriteLine($"OK: {name}");
             return true;
         }
@@ -85,5 +103,35 @@ public static class SmokeRunner
             log.WriteLine($"ЗБІЙ: {name}{Environment.NewLine}{exception}");
             return false;
         }
+    }
+
+    /// <summary>
+    /// Шаблони елементів застосовуються лише під час компонування, тому без цього кроку
+    /// відсутній ресурс чи помилка в шаблоні не проявилися б, поки вікно не покажуть.
+    /// </summary>
+    private static void ApplyTemplates(object created)
+    {
+        if (created is Window window)
+        {
+            new WindowInteropHelper(window).EnsureHandle();
+        }
+
+        if ((created is Window host ? host.Content : created) is FrameworkElement element)
+        {
+            element.Measure(LayoutSize);
+            element.Arrange(new Rect(LayoutSize));
+            element.UpdateLayout();
+        }
+    }
+
+    private static ContentControl CreatePage(AppServices services, AppSection section)
+    {
+        var viewModel = services.Navigation.Navigate(section);
+        if (Application.Current.TryFindResource(new DataTemplateKey(viewModel.GetType())) is null)
+        {
+            throw new InvalidOperationException($"Немає DataTemplate для {viewModel.GetType().Name} в App.xaml.");
+        }
+
+        return new ContentControl { Content = viewModel };
     }
 }
