@@ -1,0 +1,8 @@
+<Window x:Class="BrewLog.UI.Shell.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BrewLog">
+    <TextBlock Text="BrewLog"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" />
+</Window>

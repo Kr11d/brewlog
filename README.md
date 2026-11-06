@@ -4,6 +4,26 @@
 
 Командний навчальний проєкт із дисципліни «Парадигма ООП» (лабораторні роботи № 1–3). Стек: C#, .NET 10, WPF, SQLite. Статус: у розробці.
 
+## Запуск
+
+Потрібні Windows і [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+```bash
+dotnet run --project src/BrewLog.UI
+```
+
+Під час першого запуску застосунок створює базу даних `%LOCALAPPDATA%\BrewLog\brewlog.db`.
+
+Перевірка без показу вікон (код виходу 0 — успіх, лог у `%TEMP%\brewlog-smoke.log`) і тести:
+
+```bash
+dotnet run --project src/BrewLog.UI -- --smoke
+```
+
+```bash
+dotnet test
+```
+
 ## Документація
 
 - [Опис проєкту](docs/BrewLog-опис.pdf)
