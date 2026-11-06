@@ -48,18 +48,25 @@ public abstract class Ingredient : IEntity
 
     public abstract Ingredient Clone();
 
-    /// <summary>Повертає список помилок українською; порожній список означає, що рядок коректний.</summary>
+    /// <summary>Перевіряє рядок рецепта. Повертає список помилок українською; порожній список означає, що рядок коректний.</summary>
     public IReadOnlyList<string> Validate()
+    {
+        var errors = new List<string>(ValidateCatalogItem());
+        if (!(Amount > 0))
+        {
+            errors.Add($"{Label}: кількість має бути більшою за 0.");
+        }
+
+        return errors;
+    }
+
+    /// <summary>Перевіряє позицію довідника: там немає кількості (Amount = 0), тому важливі лише назва й характеристики.</summary>
+    public IReadOnlyList<string> ValidateCatalogItem()
     {
         var errors = new List<string>();
         if (string.IsNullOrWhiteSpace(Name))
         {
             errors.Add("Вкажіть назву інгредієнта.");
-        }
-
-        if (!(Amount > 0))
-        {
-            errors.Add($"{Label}: кількість має бути більшою за 0.");
         }
 
         errors.AddRange(ValidateCharacteristics());

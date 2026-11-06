@@ -54,4 +54,8 @@ public abstract class Repository<T> : IRepository<T> where T : class, IEntity
         using var connection = Connections.Open();
         return connection.Execute(sql, parameters);
     }
+
+    /// <summary>Чи повертає запит хоча б один рядок.</summary>
+    protected bool Exists(string sql, object? parameters = null) =>
+        QuerySingle<int>($"SELECT EXISTS ({sql})", parameters) != 0;
 }

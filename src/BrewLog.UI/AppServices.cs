@@ -1,7 +1,9 @@
 using BrewLog.Data.Infrastructure;
+using BrewLog.Data.Repositories;
 using BrewLog.Data.Security;
 using BrewLog.Data.Seed;
 using BrewLog.Domain.Abstractions;
+using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Services;
 
@@ -20,6 +22,13 @@ public sealed class AppServices
         PasswordHasher = new BCryptPasswordHasher();
         Connections = new SqliteConnectionFactory(databasePath, pooling);
         Session = new AllowAllSession();
+
+        var styles = new StyleRepository(Connections);
+        var catalog = new IngredientCatalogRepository(Connections);
+        var recipes = new RecipeRepository(Connections);
+        Catalog = new CatalogService(styles, catalog, Session);
+        Recipes = new RecipeService(recipes, catalog, Session, Clock);
+
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
         Windows = new WindowService(this);
@@ -33,6 +42,10 @@ public sealed class AppServices
     public SqliteConnectionFactory Connections { get; }
 
     public ICurrentSession Session { get; }
+
+    public CatalogService Catalog { get; }
+
+    public RecipeService Recipes { get; }
 
     public DialogService Dialogs { get; }
 

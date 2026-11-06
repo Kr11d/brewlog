@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Common;
 
@@ -73,6 +74,7 @@ public static class SmokeRunner
             var services = new AppServices(databasePath, pooling: false);
             services.InitializeDatabase();
             log.WriteLine($"OK: БД ініціалізовано ({databasePath})");
+            LogDemoRecipes(services, log);
 
             var failures = Targets(services).Count(target => !TryCreate(target.Name, target.Create, log));
             return failures == 0 ? 0 : 1;
@@ -86,6 +88,37 @@ public static class SmokeRunner
         {
             File.Delete(databasePath);
         }
+    }
+
+    /// <summary>Діагностика: показники кожного демо-рецепта й відповідність його стилю.</summary>
+    private static void LogDemoRecipes(AppServices services, TextWriter log)
+    {
+        var styles = services.Catalog.GetStyles();
+        foreach (var recipe in services.Recipes.GetAll())
+        {
+            var stats = services.Recipes.Calculate(recipe);
+            var style = styles.FirstOrDefault(item => item.Id == recipe.StyleId);
+            log.WriteLine(
+                $"Рецепт «{recipe.Name}»: OG {stats.Og:0.000} · FG {stats.Fg:0.000} · ABV {stats.Abv:0.0} % · " +
+                $"IBU {stats.Ibu:0} · SRM {stats.Srm:0} · {DescribeStyleFit(style, stats)}");
+        }
+    }
+
+    private static string DescribeStyleFit(BeerStyle? style, RecipeStats stats)
+    {
+        if (style is null)
+        {
+            return "без стилю";
+        }
+
+        var outOfRange = StyleCheck.Check(style, stats)
+            .Where(check => check.Status != StyleCheckStatus.Within)
+            .Select(check => check.Parameter)
+            .ToList();
+
+        return outOfRange.Count == 0
+            ? $"{style.Code}: в межах стилю"
+            : $"{style.Code}: поза межами стилю ({string.Join(", ", outOfRange)})";
     }
 
     private static bool TryCreate(string name, Func<object> create, TextWriter log)

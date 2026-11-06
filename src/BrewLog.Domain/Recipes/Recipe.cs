@@ -49,6 +49,30 @@ public sealed class Recipe : IEntity
     /// <summary>Рядки одного типу в порядку рецепта (статичний поліморфізм, ЛР 1).</summary>
     public IReadOnlyList<T> IngredientsOf<T>() where T : Ingredient => _ingredients.OfType<T>().ToList();
 
+    /// <summary>Створює незалежну копію з новою назвою: рядки клонуються, а ідентифікатори скидаються, щоб зберегти її як новий рецепт.</summary>
+    public Recipe CopyAs(string name)
+    {
+        var copy = new Recipe
+        {
+            Name = name,
+            StyleId = StyleId,
+            BatchVolumeL = BatchVolumeL,
+            EfficiencyPercent = EfficiencyPercent,
+            BoilTimeMin = BoilTimeMin,
+            IbuFormulaCode = IbuFormulaCode,
+            Notes = Notes,
+        };
+
+        foreach (var ingredient in _ingredients)
+        {
+            var line = ingredient.Clone();
+            line.Id = 0;
+            copy.AddIngredient(line);
+        }
+
+        return copy;
+    }
+
     /// <summary>Масштаб для партії: k = обсяг партії / обсяг рецепта; за нульового обсягу рецепта 0.</summary>
     public double ScaleFactor(double volumeL) => BatchVolumeL > 0 ? volumeL / BatchVolumeL : 0;
 
