@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Common;
+using BrewLog.UI.Features.Users;
 
 namespace BrewLog.UI;
 
@@ -43,7 +44,22 @@ public static class SmokeRunner
             {
                 yield return ($"{user.RoleDisplayName}: сторінка {section}", () => AsUser(services, user, () => CreatePage(services, section)));
             }
+
+            if (user.Can(Permission.ManageUsers))
+            {
+                yield return ($"{user.RoleDisplayName}: UsersDialog", () => AsUser(services, user, () => services.Windows.CreateUsersDialog()));
+                yield return ($"{user.RoleDisplayName}: UsersDialog, новий користувач", () => AsUser(services, user, () => CreateNewUserForm(services)));
+                yield return ($"{user.RoleDisplayName}: ResetPasswordDialog", () => AsUser(services, user, () => services.Windows.CreateResetPasswordDialog(user)));
+            }
         }
+    }
+
+    /// <summary>Діалог «Користувачі» у стані нового запису: так перевіряються поля паролів, приховані для наявного.</summary>
+    private static UsersDialog CreateNewUserForm(AppServices services)
+    {
+        var dialog = services.Windows.CreateUsersDialog();
+        ((UsersViewModel)dialog.DataContext).NewUserCommand.Execute(null);
+        return dialog;
     }
 
     /// <summary>Входить користувачем напряму, без форми входу, і створює вікно чи сторінку від його імені.</summary>

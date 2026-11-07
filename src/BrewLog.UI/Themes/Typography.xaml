@@ -27,6 +27,7 @@
     <sys:String x:Key="Glyph.ChevronDown">&#xE70D;</sys:String>
     <sys:String x:Key="Glyph.Calendar">&#xE787;</sys:String>
     <sys:String x:Key="Glyph.SignOut">&#xF3B1;</sys:String>
+    <sys:String x:Key="Glyph.Key">&#xE8D7;</sys:String>
 
     <!--
       Стилі тексту. PageTitle, SectionTitle, Body і BigNumber не задають колір: він успадковується,
@@ -65,6 +66,11 @@
         <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
         <Setter Property="Foreground" Value="{StaticResource Text.Secondary}" />
         <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- Підпис над полем форми; відступ зверху відділяє його від попереднього поля. -->
+    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Margin" Value="0,16,0,8" />
     </Style>
 
     <Style x:Key="Caption.OnAccent" TargetType="TextBlock" BasedOn="{StaticResource Caption}">

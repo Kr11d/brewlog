@@ -1,5 +1,7 @@
 using System.Windows;
+using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Login;
+using BrewLog.UI.Features.Users;
 using BrewLog.UI.Shell;
 
 namespace BrewLog.UI.Services;
@@ -52,7 +54,16 @@ public sealed class WindowService
         mainWindow?.Close();
     }
 
-    public void ShowUsers() => _services.Dialogs.ShowInfo("Буде в B7", "Користувачі");
+    public void ShowUsers() => ModalWindow.Show(CreateUsersDialog());
+
+    public UsersDialog CreateUsersDialog() =>
+        new(new UsersViewModel(_services.Users, _services.Session, _services.Dialogs, this));
+
+    /// <summary>Діалог нового пароля; true — пароль змінено.</summary>
+    public bool ShowResetPassword(User user) => ModalWindow.Show(CreateResetPasswordDialog(user)) == true;
+
+    public ResetPasswordDialog CreateResetPasswordDialog(User user) =>
+        new(new ResetPasswordViewModel(_services.Users, _services.Dialogs, user));
 
     private static void ShowAsMain(Window window)
     {

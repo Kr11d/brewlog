@@ -7,15 +7,16 @@
     <!--
       Як користуватися темою.
       Стилі, які підключаються явно:
-        ContentControl: Card, DocCard, Chip (+ .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
+        ContentControl: Card, DocCard, Chip (+ .Accent .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
                         IconBadge, IconBadge.Large, Avatar, LogoMark, LogoMark.Large
-        Button:         PrimaryButton, SecondaryButton, TextButton, IconButton, ListRowCard, MenuButton
+        Button:         PrimaryButton, SecondaryButton, TextButton, IconButton, ListRowCard, ListRowCard.Selectable, MenuButton
         TextBox:        InputBox, InputArea (плейсхолдер у Tag)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
         ComboBox:       InputCombo (плейсхолдер у Tag)
+        CheckBox:       ToggleSwitch (перемикач «увімкнено / вимкнено»)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
         Border:         Divider
-        Window:         BrewWindow, LoginWindow, MessageWindow
+        Window:         BrewWindow, LoginWindow, DialogWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
       Таблиця — CleanDataGrid у DataGrid.xaml; стилі тексту — у Typography.xaml.
     -->
@@ -28,6 +29,8 @@
     <sys:Double x:Key="Size.ControlSmall">40</sys:Double>
     <GridLength x:Key="Width.Menu">260</GridLength>
     <sys:Double x:Key="Width.LoginCard">420</sys:Double>
+    <GridLength x:Key="Width.ListPane">380</GridLength>
+    <sys:Double x:Key="Opacity.Muted">0.55</sys:Double>
     <sys:Double x:Key="Size.LogoLarge">64</sys:Double>
 
     <CornerRadius x:Key="Radius.Card">24</CornerRadius>
@@ -43,6 +46,7 @@
     <Thickness x:Key="Pad.Content">32,16,16,16</Thickness>
     <Thickness x:Key="Pad.Card">24</Thickness>
     <Thickness x:Key="Pad.CardLarge">32</Thickness>
+    <Thickness x:Key="Pad.Dialog">32,24,32,32</Thickness>
     <Thickness x:Key="Pad.Menu">16</Thickness>
     <Thickness x:Key="Pad.DialogShadow">24</Thickness>
     <Thickness x:Key="Pad.Button">28,0</Thickness>
@@ -61,6 +65,7 @@
     <Thickness x:Key="Gap.Left.8">8,0,0,0</Thickness>
     <Thickness x:Key="Gap.Left.12">12,0,0,0</Thickness>
     <Thickness x:Key="Gap.Left.16">16,0,0,0</Thickness>
+    <Thickness x:Key="Gap.Left.24">24,0,0,0</Thickness>
     <Thickness x:Key="Gap.Right.8">0,0,8,0</Thickness>
 
     <!-- Тіні -->
@@ -123,6 +128,15 @@
         <Setter Property="MinWidth" Value="0" />
         <Setter Property="MinHeight" Value="0" />
         <Setter Property="ResizeMode" Value="CanMinimize" />
+    </Style>
+
+    <!-- Модальний діалог із системним заголовком, наприклад «Користувачі» чи «Довідники». -->
+    <Style x:Key="DialogWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
+        <Setter Property="Width" Value="1040" />
+        <Setter Property="Height" Value="720" />
+        <Setter Property="MinWidth" Value="880" />
+        <Setter Property="MinHeight" Value="600" />
+        <Setter Property="ShowInTaskbar" Value="False" />
     </Style>
 
     <!-- Вікно-картка без заголовка; прозорий край лишає місце для тіні. -->
@@ -351,6 +365,21 @@
                 <Setter Property="Foreground" Value="{StaticResource Text.Disabled}" />
                 <Setter Property="Cursor" Value="Arrow" />
             </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+      Рядок-картка списку з вибором. Контекст даних має властивості IsSelected (виділити)
+      та IsMuted (приглушити, наприклад вимкнений обліковий запис).
+    -->
+    <Style x:Key="ListRowCard.Selectable" TargetType="Button" BasedOn="{StaticResource ListRowCard}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                <Setter Property="Opacity" Value="{StaticResource Opacity.Muted}" />
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 
@@ -973,6 +1002,51 @@
         </Setter>
     </Style>
 
+    <!-- Перемикач «увімкнено / вимкнено» на основі CheckBox -->
+    <Style x:Key="ToggleSwitch" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource Text.Primary}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing.Box}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Background="Transparent" Orientation="Horizontal">
+                        <Grid Width="44" Height="24" VerticalAlignment="Center">
+                            <Border x:Name="Track" Background="{StaticResource Border}" CornerRadius="12" />
+                            <Ellipse x:Name="Thumb"
+                                     Width="18"
+                                     Height="18"
+                                     Margin="3,0"
+                                     HorizontalAlignment="Left"
+                                     Fill="{StaticResource Surface}" />
+                        </Grid>
+                        <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Text.Disabled}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent}" />
+                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent.Hover}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Сегменти: RadioButton-и всередині спільної підкладки, наприклад «Дошка / Список» -->
     <Style x:Key="SegmentedGroup" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
@@ -1040,6 +1114,10 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Chip.Accent" TargetType="ContentControl" BasedOn="{StaticResource Chip}">
+        <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+    </Style>
     <Style x:Key="Chip.Planned" TargetType="ContentControl" BasedOn="{StaticResource Chip}">
         <Setter Property="Background" Value="{StaticResource Stage.Planned.Soft}" />
         <Setter Property="Foreground" Value="{StaticResource Stage.Planned}" />
