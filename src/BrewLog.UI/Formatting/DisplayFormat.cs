@@ -1,4 +1,5 @@
 using System.Globalization;
+using BrewLog.Domain.Common;
 
 namespace BrewLog.UI.Formatting;
 
@@ -16,14 +17,11 @@ public static class DisplayFormat
     /// <summary>Значення для поля вводу, без зайвих нулів: «12,5», «60».</summary>
     public static string Number(double value) => value.ToString("0.###", Culture);
 
-    /// <summary>
-    /// Читає число, яке друкує користувач: підходять і кома, і крапка.
-    /// Межі потрібні, бо собівартість рахується на кожну клавішу, а надто велике чи мале число переповнило б decimal.
-    /// </summary>
+    /// <summary>Читає число, яке друкує користувач: підходять і кома, і крапка, а значення має бути в межах NumberLimits.</summary>
     public static bool TryParseNumber(string? text, out double value)
     {
         var isNumber = double.TryParse(text?.Replace('.', ','), InputStyles, Culture, out value);
-        return isNumber && (value == 0 || Math.Abs(value) is >= 1e-6 and <= 1e9);
+        return isNumber && NumberLimits.IsAllowed(value);
     }
 
     /// <summary>Густина: «1,048».</summary>

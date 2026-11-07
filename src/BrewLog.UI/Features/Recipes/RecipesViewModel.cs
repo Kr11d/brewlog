@@ -1,5 +1,7 @@
+using System.IO;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Common;
+using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Formatting;
@@ -15,6 +17,10 @@ namespace BrewLog.UI.Features.Recipes;
 /// </summary>
 public sealed partial class RecipesViewModel : ObservableObject
 {
+    private const string BeerXmlFilter = "BeerXML (*.xml)|*.xml";
+    private const string ImportTitle = "Імпорт BeerXML";
+    private const string ExportTitle = "Експорт BeerXML";
+
     private static readonly StyleFilterOption AllStyles = new(null, "Усі стилі");
 
     private readonly RecipeService _recipes;
@@ -154,13 +160,61 @@ public sealed partial class RecipesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ImportBeerXml() => _dialogs.ShowInfo("Буде в B10", "Імпорт BeerXML");
+    private void ImportBeerXml()
+    {
+        var path = _dialogs.PickFileToOpen(BeerXmlFilter, ImportTitle);
+        if (path is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = _recipes.Import(path);
+            Reload(result.RecipeIds[0]);
+            _dialogs.ShowInfo(DescribeImport(result), ImportTitle);
+        }
+        catch (DomainException exception)
+        {
+            _dialogs.ShowError(exception.Message, ImportTitle);
+        }
+    }
 
     [RelayCommand]
-    private void ExportBeerXml() => _dialogs.ShowInfo("Буде в B10", "Експорт BeerXML");
+    private void ExportBeerXml()
+    {
+        if (SelectedRow is not { } row)
+        {
+            return;
+        }
+
+        var path = _dialogs.PickFileToSave(BeerXmlFilter, ExportTitle, $"{row.Name}.xml");
+        if (path is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _recipes.Export([row.Id], path);
+            _dialogs.ShowInfo($"Рецепт «{row.Name}» збережено у файл {Path.GetFileName(path)}.", ExportTitle);
+        }
+        catch (DomainException exception)
+        {
+            _dialogs.ShowError(exception.Message, ExportTitle);
+        }
+    }
 
     [RelayCommand]
     private void OpenReferences() => _dialogs.ShowInfo("Буде в B11", "Довідники");
+
+    private static string DescribeImport(RecipeImportResult result)
+    {
+        var recipes = DisplayFormat.Count(result.RecipeIds.Count, "рецепт", "рецепти", "рецептів");
+        return result.NewCatalogItems == 0
+            ? $"Імпортовано {recipes}. Усі інгредієнти вже є в довіднику."
+            : $"Імпортовано {recipes}, додано {DisplayFormat.Count(result.NewCatalogItems, "новий інгредієнт", "нові інгредієнти", "нових інгредієнтів")} в довідник.";
+    }
 
     /// <summary>Перечитує рецепти й показники; вибраним лишається рецепт selectId, якщо він є.</summary>
     private void Reload(int? selectId = null)
