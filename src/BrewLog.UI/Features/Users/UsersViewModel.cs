@@ -20,6 +20,9 @@ public sealed partial class UsersViewModel : ObservableObject
     private readonly WindowService _windows;
 
     private List<UserRowViewModel> _allRows = [];
+    private string _newPassword = string.Empty;
+    private string _confirmPassword = string.Empty;
+    private bool _isDirty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmptyResult))]
@@ -78,9 +81,23 @@ public sealed partial class UsersViewModel : ObservableObject
     public IReadOnlyList<RoleOption> Roles { get; }
 
     /// <summary>Пароль нового користувача; приходить із PasswordBox через code-behind.</summary>
-    public string NewPassword { private get; set; } = string.Empty;
+    public string NewPassword
+    {
+        set
+        {
+            _newPassword = value;
+            _isDirty |= value.Length > 0;
+        }
+    }
 
-    public string ConfirmPassword { private get; set; } = string.Empty;
+    public string ConfirmPassword
+    {
+        set
+        {
+            _confirmPassword = value;
+            _isDirty |= value.Length > 0;
+        }
+    }
 
     public bool IsExisting => !IsNew && SelectedRow is not null;
 
@@ -88,11 +105,28 @@ public sealed partial class UsersViewModel : ObservableObject
 
     public bool IsEmptyResult => Rows.Count == 0;
 
+    /// <summary>Викликається під час закриття вікна будь-яким способом: незбережені зміни потребують підтвердження.</summary>
+    public bool ConfirmClose() =>
+        !_isDirty || _dialogs.Confirm("Незбережені зміни буде втрачено.", "Закрити без збереження?", "Закрити", "Лишитися");
+
     partial void OnSearchTextChanged(string value) => ApplyFilter();
+
+    partial void OnFullNameChanged(string value) => _isDirty = true;
+
+    partial void OnLoginChanged(string value) => _isDirty = true;
+
+    partial void OnSelectedRoleChanged(RoleOption? value) => _isDirty = true;
+
+    partial void OnIsActiveChanged(bool value) => _isDirty = true;
 
     [RelayCommand]
     private void NewUser()
     {
+        if (!ConfirmDiscard())
+        {
+            return;
+        }
+
         MarkSelected(null);
         IsNew = true;
         FormTitle = "Новий користувач";
@@ -101,6 +135,7 @@ public sealed partial class UsersViewModel : ObservableObject
         SelectedRole = null;
         IsActive = true;
         ClearPasswords();
+        _isDirty = false;
     }
 
     [RelayCommand]
@@ -116,7 +151,7 @@ public sealed partial class UsersViewModel : ObservableObject
         var editedId = SelectedRow?.Id;
         try
         {
-            var id = IsNew ? _users.Create(Login, FullName, SelectedRole!.Role, NewPassword).Id : SaveExisting(SelectedRow!.User);
+            var id = IsNew ? _users.Create(Login, FullName, SelectedRole!.Role, _newPassword).Id : SaveExisting(SelectedRow!.User);
             LoadRows();
             Select(_allRows.First(row => row.Id == id));
         }
@@ -142,6 +177,18 @@ public sealed partial class UsersViewModel : ObservableObject
         }
     }
 
+    /// <summary>Натискання на рядок. Повторне натискання на вибраний рядок не скидає введеного.</summary>
+    private void OnRowClicked(UserRowViewModel row)
+    {
+        if ((row != SelectedRow || IsNew) && ConfirmDiscard())
+        {
+            Select(row);
+        }
+    }
+
+    private bool ConfirmDiscard() =>
+        !_isDirty || _dialogs.Confirm("Незбережені зміни буде втрачено.", "Відкинути зміни?", "Відкинути", "Лишитися");
+
     private void Select(UserRowViewModel row)
     {
         MarkSelected(row);
@@ -152,6 +199,7 @@ public sealed partial class UsersViewModel : ObservableObject
         SelectedRole = Roles.First(option => option.Role == row.User.Role);
         IsActive = row.User.IsActive;
         ClearPasswords();
+        _isDirty = false;
     }
 
     /// <summary>Перевірки самої форми, яких немає в UserService: вибір ролі й збіг паролів.</summary>
@@ -162,7 +210,7 @@ public sealed partial class UsersViewModel : ObservableObject
             return "Оберіть роль.";
         }
 
-        return IsNew && NewPassword != ConfirmPassword ? "Паролі не збігаються." : null;
+        return IsNew && _newPassword != _confirmPassword ? "Паролі не збігаються." : null;
     }
 
     /// <summary>Зберігає лише змінене: ім'я й роль — одним викликом, активність — іншим.</summary>
@@ -199,7 +247,7 @@ public sealed partial class UsersViewModel : ObservableObject
 
         _allRows = _users.GetAll()
             .OrderBy(user => user.FullName, byName)
-            .Select(user => new UserRowViewModel(user, Select))
+            .Select(user => new UserRowViewModel(user, OnRowClicked))
             .ToList();
         Summary = $"Облікових записів: {_allRows.Count}";
 
@@ -225,8 +273,8 @@ public sealed partial class UsersViewModel : ObservableObject
 
     private void ClearPasswords()
     {
-        NewPassword = string.Empty;
-        ConfirmPassword = string.Empty;
+        _newPassword = string.Empty;
+        _confirmPassword = string.Empty;
         PasswordsCleared?.Invoke();
     }
 }

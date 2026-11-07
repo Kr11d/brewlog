@@ -25,6 +25,7 @@ public abstract partial class ReferenceSectionViewModel<TEntity> : ObservableObj
     private IReadOnlyList<ReferenceRowViewModel> _rows = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EmptyText))]
     private string _searchText = string.Empty;
 
     [ObservableProperty]
@@ -62,6 +63,9 @@ public abstract partial class ReferenceSectionViewModel<TEntity> : ObservableObj
     public bool IsFormVisible => Form is not null;
 
     public bool IsEmptyResult => Rows.Count == 0;
+
+    /// <summary>Порожній стан відрізняє «позицій немає зовсім» від «пошук нічого не знайшов».</summary>
+    public string EmptyText => string.IsNullOrWhiteSpace(SearchText) ? "Позицій ще немає" : "Нічого не знайдено";
 
     /// <summary>Чи є у формі зміни, яких немає в БД.</summary>
     public bool IsDirty { get; private set; }

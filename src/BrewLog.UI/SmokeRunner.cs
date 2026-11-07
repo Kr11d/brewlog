@@ -218,9 +218,10 @@ public static class SmokeRunner
 
     private static bool TryCreate(string name, Func<object> create, TextWriter log)
     {
+        object? created = null;
         try
         {
-            var created = create();
+            created = create();
             ApplyTemplates(created);
             (created as Window)?.Close();
             log.WriteLine($"OK: {name}");
@@ -229,7 +230,21 @@ public static class SmokeRunner
         catch (Exception exception)
         {
             log.WriteLine($"ЗБІЙ: {name}{Environment.NewLine}{exception}");
+            DiscardBroken(created as Window);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Прибирає вміст вікна зі збоєм. Інакше WPF компонував би його знову під час наступних перевірок: той самий виняток
+    /// виглядав би як збій інших вікон, а процес падав би без підсумку в лозі.
+    /// </summary>
+    private static void DiscardBroken(Window? window)
+    {
+        if (window is not null)
+        {
+            window.Content = null;
+            window.Close();
         }
     }
 

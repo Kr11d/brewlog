@@ -7,10 +7,10 @@
     <!--
       Як користуватися темою.
       Стилі, які підключаються явно:
-        ContentControl: Card, DocCard, Chip (+ .Accent .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
-                        IconBadge, IconBadge.Large, Avatar, LogoMark, LogoMark.Large
+        ContentControl: Card, DocCard, Chip (+ .Accent .Row .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
+                        IconBadge, IconBadge.Large, Avatar, Avatar.Row, LogoMark, LogoMark.Large
         Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, IconButton.Cell, ListRowCard, ListRowCard.Selectable, MenuButton, PickerOption
-        TextBox:        InputBox, InputArea (плейсхолдер у Tag);
+        TextBox:        InputBox, InputArea (плейсхолдер у Tag); SearchBox (поле пошуку екрана: Ctrl+F переводить у нього фокус);
                         NumberBox, NumberBox.Cell (DataContext — NumberField: текст прив'язаний сам, неправильне число дає червону рамку)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
         ComboBox:       InputCombo, InputCombo.Cell (плейсхолдер у Tag)
@@ -19,7 +19,7 @@
         Border:         Divider
         Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush)
         StyleRangeBar:  StyleRangeBar (контекст даних має IsWithin)
-        Window:         BrewWindow, LoginWindow, DialogWindow, EditorWindow, MessageWindow
+        Window:         BrewWindow, LoginWindow, DialogWindow (Esc закриває), EditorWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
       Таблиця — CleanDataGrid у DataGrid.xaml; стилі тексту — у Typography.xaml.
     -->
@@ -65,6 +65,7 @@
     <Thickness x:Key="Pad.DialogShadow">24</Thickness>
     <Thickness x:Key="Pad.Button">28,0</Thickness>
     <Thickness x:Key="Pad.ButtonSmall">16,0</Thickness>
+    <Thickness x:Key="Pad.ButtonCompact">8,0</Thickness>
     <Thickness x:Key="Pad.Input">14,0</Thickness>
     <Thickness x:Key="Pad.InputCell">8,0</Thickness>
     <Thickness x:Key="Pad.Picker">12</Thickness>
@@ -159,6 +160,7 @@
         <Setter Property="MinWidth" Value="880" />
         <Setter Property="MinHeight" Value="600" />
         <Setter Property="ShowInTaskbar" Value="False" />
+        <Setter Property="controls:CloseOnEscape.IsEnabled" Value="True" />
     </Style>
 
     <!-- Велике модальне вікно на кілька колонок, наприклад редактор рецепта. Колонки прокручуються окремо, тому мінімальна висота менша. -->
@@ -298,7 +300,7 @@
 
     <!-- Вужча другорядна кнопка: для кількох дій поряд у вузькій панелі. -->
     <Style x:Key="SecondaryButton.Compact" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
-        <Setter Property="Padding" Value="{StaticResource Pad.ButtonSmall}" />
+        <Setter Property="Padding" Value="{StaticResource Pad.ButtonCompact}" />
     </Style>
 
     <Style x:Key="TextButton" TargetType="Button" BasedOn="{StaticResource PillButton}">
@@ -538,6 +540,11 @@
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="VerticalContentAlignment" Value="Top" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <!-- Поле пошуку екрана: Ctrl+F переводить у нього фокус. -->
+    <Style x:Key="SearchBox" TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+        <Setter Property="controls:SearchShortcut.IsTarget" Value="True" />
     </Style>
 
     <!-- Числове поле: контекст даних — NumberField. Текст прив'язаний тут, щоб не повторювати це в кожному полі форми. -->
@@ -872,12 +879,14 @@
                                     DockPanel.Dock="Left"
                                     Style="{StaticResource InputDate.NavButton}"
                                     Focusable="False"
-                                    Content="{StaticResource Glyph.ChevronLeft}" />
+                                    Content="{StaticResource Glyph.ChevronLeft}"
+                                    ToolTip="Попередній" />
                             <Button x:Name="PART_NextButton"
                                     DockPanel.Dock="Right"
                                     Style="{StaticResource InputDate.NavButton}"
                                     Focusable="False"
-                                    Content="{StaticResource Glyph.ChevronRight}" />
+                                    Content="{StaticResource Glyph.ChevronRight}"
+                                    ToolTip="Наступний" />
                             <Button x:Name="PART_HeaderButton"
                                     Style="{StaticResource InputDate.HeaderButton}"
                                     Focusable="False"
@@ -1005,7 +1014,8 @@
                                     Margin="0,0,2,0"
                                     Focusable="False"
                                     Foreground="{StaticResource Text.Secondary}"
-                                    Content="{StaticResource Glyph.Calendar}" />
+                                    Content="{StaticResource Glyph.Calendar}"
+                                    ToolTip="Обрати дату" />
                             <Popup x:Name="PART_Popup"
                                    AllowsTransparency="True"
                                    HorizontalOffset="-16"
@@ -1241,6 +1251,14 @@
         <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
         <Setter Property="Foreground" Value="{StaticResource Accent}" />
     </Style>
+    <!-- Для ListRowCard.Selectable: на тонованому фоні вибраного рядка чип не зливається з ним. Контекст даних має IsSelected. -->
+    <Style x:Key="Chip.Row" TargetType="ContentControl" BasedOn="{StaticResource Chip.Accent}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
     <Style x:Key="Chip.Planned" TargetType="ContentControl" BasedOn="{StaticResource Chip}">
         <Setter Property="Background" Value="{StaticResource Stage.Planned.Soft}" />
         <Setter Property="Foreground" Value="{StaticResource Stage.Planned}" />
@@ -1312,6 +1330,15 @@
         <Setter Property="FontFamily" Value="{StaticResource Font.Text}" />
         <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Для ListRowCard.Selectable: на тонованому фоні вибраного рядка аватар не зливається з ним. Контекст даних має IsSelected. -->
+    <Style x:Key="Avatar.Row" TargetType="ContentControl" BasedOn="{StaticResource Avatar}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Розмір значка келиха задає Padding: так одна розмітка служить і меню, і вікну входу. -->

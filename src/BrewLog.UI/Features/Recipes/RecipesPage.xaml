@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="{StaticResource Width.Filter}" />
             </Grid.ColumnDefinitions>
-            <TextBox Style="{StaticResource InputBox}"
+            <TextBox Style="{StaticResource SearchBox}"
                      Tag="Пошук за назвою"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             <ComboBox Grid.Column="1"
@@ -76,40 +76,49 @@
                                         ElementStyle="{StaticResource CleanDataGrid.Text}"
                                         Header="Стиль" />
                     <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                        MinWidth="{StaticResource Column.MinNarrow}"
                                         Binding="{Binding OgText}"
                                         ElementStyle="{StaticResource CleanDataGrid.Number}"
                                         Header="OG"
                                         HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
                                         SortMemberPath="Og" />
                     <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                        MinWidth="{StaticResource Column.MinNarrow}"
                                         Binding="{Binding FgText}"
                                         ElementStyle="{StaticResource CleanDataGrid.Number}"
                                         Header="FG"
                                         HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
                                         SortMemberPath="Fg" />
                     <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                        MinWidth="{StaticResource Column.MinNarrow}"
                                         Binding="{Binding AbvText}"
                                         ElementStyle="{StaticResource CleanDataGrid.Number}"
                                         Header="ABV"
                                         HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
                                         SortMemberPath="Abv" />
                     <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                        MinWidth="{StaticResource Column.MinNarrow}"
                                         Binding="{Binding IbuText}"
                                         ElementStyle="{StaticResource CleanDataGrid.Number}"
                                         Header="IBU"
                                         HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
                                         SortMemberPath="Ibu" />
-                    <DataGridTemplateColumn Width="{StaticResource Column.Number}" Header="Колір" SortMemberPath="Srm">
+                    <DataGridTemplateColumn Width="{StaticResource Column.Number}"
+                                            MinWidth="{StaticResource Column.MinNumber}"
+                                            Header="Колір"
+                                            HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
+                                            SortMemberPath="Srm">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse Style="{StaticResource Swatch}" Fill="{Binding Srm, Converter={StaticResource SrmToBrush}}" />
-                                    <TextBlock Margin="{StaticResource Gap.Left.8}" VerticalAlignment="Center" Text="{Binding EbcText}" />
-                                </StackPanel>
+                                <DockPanel>
+                                    <Ellipse DockPanel.Dock="Left" Style="{StaticResource Swatch}" Fill="{Binding Srm, Converter={StaticResource SrmToBrush}}" />
+                                    <TextBlock Style="{StaticResource CleanDataGrid.Number}" VerticalAlignment="Center" Text="{Binding EbcText}" />
+                                </DockPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                        MinWidth="{StaticResource Column.MinNumber}"
                                         Binding="{Binding CostText}"
                                         ElementStyle="{StaticResource CleanDataGrid.Number}"
                                         Header="грн/л"

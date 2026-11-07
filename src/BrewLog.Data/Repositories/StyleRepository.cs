@@ -2,7 +2,6 @@ using BrewLog.Data.Infrastructure;
 using BrewLog.Data.Rows;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Recipes;
-using Dapper;
 
 namespace BrewLog.Data.Repositories;
 

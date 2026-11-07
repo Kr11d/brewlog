@@ -9,7 +9,7 @@
         <DataTemplate x:Key="SectionList">
             <DockPanel>
                 <TextBox DockPanel.Dock="Top"
-                         Style="{StaticResource InputBox}"
+                         Style="{StaticResource SearchBox}"
                          Tag="{Binding SearchHint}"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                 <Button DockPanel.Dock="Top"
@@ -26,7 +26,7 @@
                                     <Button Style="{StaticResource ListRowCard.Selectable}" Command="{Binding SelectCommand}">
                                         <DockPanel>
                                             <ContentControl DockPanel.Dock="Left"
-                                                            Style="{StaticResource Chip.Accent}"
+                                                            Style="{StaticResource Chip.Row}"
                                                             Margin="{StaticResource Gap.Right.8}"
                                                             Content="{Binding Code}"
                                                             Visibility="{Binding HasCode, Converter={StaticResource BoolToVisibility}}" />
@@ -43,7 +43,7 @@
                     <TextBlock Style="{StaticResource Caption}"
                                HorizontalAlignment="Center"
                                Margin="{StaticResource Gap.Top.24}"
-                               Text="Нічого не знайдено"
+                               Text="{Binding EmptyText}"
                                Visibility="{Binding IsEmptyResult, Converter={StaticResource BoolToVisibility}}" />
                 </Grid>
             </DockPanel>
@@ -140,7 +140,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Style="{StaticResource PageTitle}" Margin="{StaticResource Gap.Bottom.16}" Text="Довідники" />
+        <StackPanel Margin="{StaticResource Gap.Bottom.24}">
+            <TextBlock Style="{StaticResource PageTitle}" Text="Довідники" />
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Margin="{StaticResource Gap.Top.4}"
+                       Text="Стилі BJCP і характеристики інгредієнтів для нових рецептів" />
+        </StackPanel>
 
         <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="Стилі BJCP">
@@ -156,6 +161,11 @@
                                     Style="{StaticResource Card}"
                                     Margin="{StaticResource Gap.Left.24}"
                                     Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}">
+                        <!-- Enter і Ctrl+S діють лише у формі: Enter у полі пошуку нічого не зберігає. -->
+                        <ContentControl.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SaveCommand}" />
+                            <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+                        </ContentControl.InputBindings>
                         <DockPanel>
                             <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding}" ContentTemplate="{StaticResource FormActions}" />
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -203,7 +213,7 @@
                                     <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Form.Ranges}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Grid Margin="{StaticResource Gap.Bottom.8}">
+                                                <Grid Margin="{StaticResource Gap.Bottom.4}">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="{StaticResource Width.RangeLabel}" />
                                                         <ColumnDefinition Width="*" />
@@ -259,6 +269,10 @@
                                     Style="{StaticResource Card}"
                                     Margin="{StaticResource Gap.Left.24}"
                                     Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}">
+                        <ContentControl.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SaveCommand}" />
+                            <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+                        </ContentControl.InputBindings>
                         <DockPanel>
                             <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding}" ContentTemplate="{StaticResource FormActions}" />
                             <ScrollViewer VerticalScrollBarVisibility="Auto">

@@ -1,4 +1,5 @@
 using System.Windows;
+using BrewLog.UI.Controls;
 
 namespace BrewLog.UI.Features.References;
 
@@ -10,7 +11,10 @@ public partial class ReferencesDialog : Window
         InitializeComponent();
         DataContext = viewModel;
 
-        // Хрестик заголовка не має мовчки втратити незбережені зміни.
+        // Поле пошуку лежить у шаблоні, тому FocusManager.FocusedElement до нього не дістається.
+        Loaded += (_, _) => SearchShortcut.FocusTarget(this);
+
+        // Сюди сходяться і Esc, і хрестик заголовка: жоден із них не втратить зміни мовчки.
         Closing += (_, e) => e.Cancel = !viewModel.ConfirmClose();
     }
 }
