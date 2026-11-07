@@ -38,6 +38,8 @@
     <GridLength x:Key="Width.Filter">300</GridLength>
     <GridLength x:Key="Width.EditorParams">260</GridLength>
     <GridLength x:Key="Width.EditorStats">300</GridLength>
+    <GridLength x:Key="Width.StyleCode">120</GridLength>
+    <GridLength x:Key="Width.RangeLabel">72</GridLength>
     <sys:Double x:Key="Width.Picker">320</sys:Double>
     <sys:Double x:Key="Height.PickerList">260</sys:Double>
     <sys:Double x:Key="Size.ControlCell">36</sys:Double>
@@ -1445,45 +1447,49 @@
         </Setter>
     </Style>
 
-    <!-- Вкладки-«пігулки» -->
+    <!--
+      Вкладки-«пігулки». Колір і насиченість задаються заголовку в шаблоні, а не самій вкладці: її властивості успадкував би вміст
+      вкладки, і текст без власного кольору став би білим на білій картці. Відступ теж у шаблоні: Margin вкладки TabPanel обрізає.
+    -->
     <Style TargetType="TabItem">
         <Setter Property="Height" Value="{StaticResource Size.ControlSmall}" />
         <Setter Property="Padding" Value="20,0" />
-        <Setter Property="Margin" Value="{StaticResource Gap.Right.8}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource Text.Secondary}" />
-        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing.Pill}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
-                    <Border Background="{TemplateBinding Background}"
+                    <Border Margin="{StaticResource Gap.Right.8}"
+                            Background="{TemplateBinding Background}"
                             CornerRadius="{StaticResource Radius.PillSmall}"
                             Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center"
+                        <ContentPresenter x:Name="Header"
+                                          HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
                                           ContentSource="Header"
-                                          RecognizesAccessKey="True" />
+                                          RecognizesAccessKey="True"
+                                          TextElement.FontSize="{StaticResource FontSize.Body}"
+                                          TextElement.Foreground="{StaticResource Text.Secondary}" />
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
+                            <Setter TargetName="Header" Property="TextElement.Foreground" Value="{StaticResource Text.Primary}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{StaticResource Accent}" />
+                            <Setter TargetName="Header" Property="TextElement.Foreground" Value="{StaticResource Text.OnAccent}" />
+                            <Setter TargetName="Header" Property="TextElement.FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Header" Property="TextElement.Foreground" Value="{StaticResource Text.Disabled}" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
-                <Setter Property="Foreground" Value="{StaticResource Text.Primary}" />
-            </Trigger>
-            <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{StaticResource Accent}" />
-                <Setter Property="Foreground" Value="{StaticResource Text.OnAccent}" />
-                <Setter Property="FontWeight" Value="SemiBold" />
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Text.Disabled}" />
-                <Setter Property="Cursor" Value="Arrow" />
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style TargetType="TabControl">

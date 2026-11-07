@@ -61,6 +61,12 @@ public sealed class CatalogService
     public IReadOnlyList<Ingredient> GetCatalog(IngredientKind? kind = null) =>
         kind is null ? _catalog.GetAll() : _catalog.GetByKind(kind.Value);
 
+    /// <summary>Остання ціна за одиницю, грн, за ідентифікатором позиції. Змінює її власник на складі, не тут.</summary>
+    public IReadOnlyDictionary<int, decimal> GetLastPrices() => _catalog.GetLastPrices();
+
+    /// <summary>Мінімальний запас за ідентифікатором позиції. Змінює його власник на складі, не тут.</summary>
+    public IReadOnlyDictionary<int, double> GetMinStocks() => _catalog.GetMinStocks();
+
     /// <summary>Перевіряє й зберігає позицію довідника; повертає її ідентифікатор.</summary>
     public int SaveCatalogItem(Ingredient item)
     {

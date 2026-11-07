@@ -56,4 +56,23 @@ public sealed class IngredientCatalogRepositoryTests : IDisposable
         Assert.True(_catalog.IsUsed(inStock));
         Assert.False(_catalog.IsUsed(unused));
     }
+
+    /// <summary>Довідники змінюють лише характеристики: ціну й мінімум редагує власник на складі.</summary>
+    [Fact]
+    public void Update_ItemWithPriceAndMinimum_KeepsThem()
+    {
+        var id = _catalog.Insert(BoilHop());
+        using (var connection = _database.Connections.Open())
+        {
+            connection.Execute("UPDATE ingredient_catalog SET min_stock = 250, last_price = 1.5 WHERE id = @id", new { id });
+        }
+
+        var edited = (Hop)_catalog.GetById(id)!;
+        edited.AlphaPercent = 12;
+        _catalog.Update(edited);
+
+        Assert.Equal(12, ((Hop)_catalog.GetById(id)!).AlphaPercent, 0.001);
+        Assert.Equal(250, _catalog.GetMinStocks()[id], 0.001);
+        Assert.Equal(1.5m, _catalog.GetLastPrices()[id]);
+    }
 }

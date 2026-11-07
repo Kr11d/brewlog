@@ -6,6 +6,7 @@ using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Common;
 using BrewLog.UI.Features.RecipeEditor;
+using BrewLog.UI.Features.References;
 using BrewLog.UI.Features.Users;
 
 namespace BrewLog.UI;
@@ -53,6 +54,16 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: CatalogPicker", () => AsUser(services, user, () => CreateCatalogPicker(services)));
             }
 
+            if (user.Can(Permission.EditReferences))
+            {
+                yield return ($"{user.RoleDisplayName}: ReferencesDialog, стилі", () => AsUser(services, user, () => services.Windows.CreateReferencesDialog()));
+                yield return ($"{user.RoleDisplayName}: ReferencesDialog, новий стиль", () => AsUser(services, user, () => CreateNewStyleForm(services)));
+                foreach (var kind in Enum.GetValues<IngredientKind>())
+                {
+                    yield return ($"{user.RoleDisplayName}: ReferencesDialog, {kind}", () => AsUser(services, user, () => CreateIngredientsTab(services, kind)));
+                }
+            }
+
             if (user.Can(Permission.ManageUsers))
             {
                 yield return ($"{user.RoleDisplayName}: UsersDialog", () => AsUser(services, user, () => services.Windows.CreateUsersDialog()));
@@ -67,6 +78,24 @@ public static class SmokeRunner
     {
         var dialog = services.Windows.CreateUsersDialog();
         ((UsersViewModel)dialog.DataContext).NewUserCommand.Execute(null);
+        return dialog;
+    }
+
+    /// <summary>Діалог «Довідники» у стані нового стилю: лише так перевіряються порожні поля форми.</summary>
+    private static ReferencesDialog CreateNewStyleForm(AppServices services)
+    {
+        var dialog = services.Windows.CreateReferencesDialog();
+        ((ReferencesViewModel)dialog.DataContext).Styles.NewItemCommand.Execute(null);
+        return dialog;
+    }
+
+    /// <summary>Вкладка інгредієнтів на потрібному типі: TabControl компонує лише вибрану вкладку, а шаблон форми в кожного типу свій.</summary>
+    private static ReferencesDialog CreateIngredientsTab(AppServices services, IngredientKind kind)
+    {
+        var dialog = services.Windows.CreateReferencesDialog();
+        var viewModel = (ReferencesViewModel)dialog.DataContext;
+        viewModel.SelectedTabIndex = 1;
+        viewModel.Kinds.First(section => section.Kind == kind).IsSelected = true;
         return dialog;
     }
 

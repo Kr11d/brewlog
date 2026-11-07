@@ -41,6 +41,10 @@ public sealed class IngredientCatalogRepository : Repository<Ingredient>, IIngre
         Query<IngredientCatalogRow>("SELECT id, last_price FROM ingredient_catalog")
             .ToDictionary(row => row.Id, row => (decimal)row.LastPrice);
 
+    public IReadOnlyDictionary<int, double> GetMinStocks() =>
+        Query<IngredientCatalogRow>("SELECT id, min_stock FROM ingredient_catalog")
+            .ToDictionary(row => row.Id, row => row.MinStock);
+
     protected override IReadOnlyList<Ingredient> Load(string sql, object? parameters = null) =>
         Query<IngredientCatalogRow>(sql, parameters).Select(row => IngredientFactory.FromData(row.ToData())).ToList();
 }
