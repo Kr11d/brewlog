@@ -5,6 +5,7 @@ using BrewLog.Data.Seed;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Recipes;
 using BrewLog.UI.Services;
 
 namespace BrewLog.UI;
@@ -94,5 +95,8 @@ public sealed class AppServices
     /// Сторінки розділів. Сюди кожен розробник додає свою: [AppSection.Recipes] = () => new RecipesViewModel(...).
     /// Розділ без запису показує PlaceholderPage.
     /// </summary>
-    private Dictionary<AppSection, Func<object>> CreatePageFactories() => new();
+    private Dictionary<AppSection, Func<object>> CreatePageFactories() => new()
+    {
+        [AppSection.Recipes] = () => new RecipesViewModel(Recipes, Catalog, Session, Dialogs, Windows),
+    };
 }

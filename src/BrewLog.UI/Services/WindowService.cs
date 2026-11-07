@@ -54,6 +54,13 @@ public sealed class WindowService
         mainWindow?.Close();
     }
 
+    /// <summary>Редактор рецепта: id = null — новий рецепт; true — рецепт збережено. Вікно з'явиться в B9.</summary>
+    public bool ShowRecipeEditor(int? id)
+    {
+        _services.Dialogs.ShowInfo("Буде в B9", id is null ? "Новий рецепт" : "Редагування рецепта");
+        return false;
+    }
+
     public void ShowUsers() => ModalWindow.Show(CreateUsersDialog());
 
     public UsersDialog CreateUsersDialog() =>
