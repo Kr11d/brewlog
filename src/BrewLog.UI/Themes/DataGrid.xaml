@@ -12,12 +12,16 @@
       Ширину колонок задавайте явно: Width="*" для тексту, Width="{StaticResource Column.Number}" для чисел.
       Числові колонки вирівнюйте праворуч: HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}",
       ElementStyle="{StaticResource CleanDataGrid.Number}". Довгий текст обрізайте: ElementStyle="{StaticResource CleanDataGrid.Text}".
+      Числовій колонці поруч із зірочковими задавайте і MinWidth (Column.MinNarrow, Column.MinNumber): без нього у вузькому вікні DataGrid
+      стискає її й обрізає числа («1,0…»), а з ним показує горизонтальну прокрутку.
       Колонка Auto поруч із колонкою * обрізає значення, значно ширші за заголовок: DataGrid не віддає їй місце.
     -->
 
-    <sys:Double x:Key="Column.MinText">160</sys:Double>
+    <sys:Double x:Key="Column.MinText">120</sys:Double>
     <DataGridLength x:Key="Column.Narrow">72</DataGridLength>
+    <sys:Double x:Key="Column.MinNarrow">72</sys:Double>
     <DataGridLength x:Key="Column.Number">96</DataGridLength>
+    <sys:Double x:Key="Column.MinNumber">96</sys:Double>
     <DataGridLength x:Key="Column.Medium">160</DataGridLength>
     <sys:Double x:Key="Column.MinName">100</sys:Double>
     <DataGridLength x:Key="Column.Input">80</DataGridLength>

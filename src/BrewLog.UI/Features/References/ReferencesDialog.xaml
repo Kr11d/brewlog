@@ -1,0 +1,315 @@
+<Window x:Class="BrewLog.UI.Features.References.ReferencesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:references="clr-namespace:BrewLog.UI.Features.References"
+        Title="Довідники — BrewLog"
+        Style="{StaticResource DialogWindow}">
+    <Window.Resources>
+        <!-- Ліва колонка обох вкладок: пошук, нова позиція й рядки-картки. Контекст даних — секція довідника. -->
+        <DataTemplate x:Key="SectionList">
+            <DockPanel>
+                <TextBox DockPanel.Dock="Top"
+                         Style="{StaticResource SearchBox}"
+                         Tag="{Binding SearchHint}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <Button DockPanel.Dock="Top"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="{StaticResource Gap.Top.16}"
+                        Command="{Binding NewItemCommand}"
+                        Content="{Binding NewItemButton}" />
+
+                <Grid Margin="{StaticResource Gap.Top.16}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Rows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource ListRowCard.Selectable}" Command="{Binding SelectCommand}">
+                                        <DockPanel>
+                                            <ContentControl DockPanel.Dock="Left"
+                                                            Style="{StaticResource Chip.Row}"
+                                                            Margin="{StaticResource Gap.Right.8}"
+                                                            Content="{Binding Code}"
+                                                            Visibility="{Binding HasCode, Converter={StaticResource BoolToVisibility}}" />
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Title}" />
+                                                <TextBlock Style="{StaticResource Caption}" Text="{Binding Caption}" />
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Style="{StaticResource Caption}"
+                               HorizontalAlignment="Center"
+                               Margin="{StaticResource Gap.Top.24}"
+                               Text="{Binding EmptyText}"
+                               Visibility="{Binding IsEmptyResult, Converter={StaticResource BoolToVisibility}}" />
+                </Grid>
+            </DockPanel>
+        </DataTemplate>
+
+        <!-- Дії форми: завжди видно, навіть коли поля прокручуються. Контекст даних — секція довідника. -->
+        <DataTemplate x:Key="FormActions">
+            <StackPanel Margin="{StaticResource Gap.Top.16}" Orientation="Horizontal">
+                <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" Content="Зберегти" />
+                <Button Style="{StaticResource SecondaryButton}"
+                        Margin="{StaticResource Gap.Left.8}"
+                        Command="{Binding DeleteCommand}"
+                        Content="Видалити"
+                        Visibility="{Binding IsExisting, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Характеристики за типом інгредієнта: WPF обирає шаблон за класом форми. -->
+        <DataTemplate DataType="{x:Type references:MaltFormViewModel}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Вихід екстракту, %" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding YieldPercent}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Колір, °L" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding ColorLovibond}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="{StaticResource Gap.Left.16}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Вид" />
+                    <Border Style="{StaticResource SegmentedGroup}">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Style="{StaticResource SegmentedButton}"
+                                         Command="{Binding UseGrainCommand}"
+                                         Content="Зерно"
+                                         GroupName="MaltKind"
+                                         IsChecked="{Binding IsGrain, Mode=OneWay}" />
+                            <RadioButton Style="{StaticResource SegmentedButton}"
+                                         Command="{Binding UseExtractCommand}"
+                                         Content="Екстракт"
+                                         GroupName="MaltKind"
+                                         IsChecked="{Binding IsExtract, Mode=OneWay}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type references:HopFormViewModel}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Альфа-кислоти, %" />
+                <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding AlphaPercent}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type references:YeastFormViewModel}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Зброджування, %" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding AttenuationPercent}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Температура від, °C" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding TempMinC}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="{StaticResource Gap.Left.16}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Температура до, °C" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding TempMaxC}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type references:AdjunctFormViewModel}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Вихід екстракту, %" />
+                <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding YieldPercent}" />
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="{StaticResource Pad.Dialog}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="{StaticResource Gap.Bottom.24}">
+            <TextBlock Style="{StaticResource PageTitle}" Text="Довідники" />
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Margin="{StaticResource Gap.Top.4}"
+                       Text="Стилі BJCP і характеристики інгредієнтів для нових рецептів" />
+        </StackPanel>
+
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
+            <TabItem Header="Стилі BJCP">
+                <Grid DataContext="{Binding Styles}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource Width.ListPane}" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource SectionList}" />
+
+                    <ContentControl Grid.Column="1"
+                                    Style="{StaticResource Card}"
+                                    Margin="{StaticResource Gap.Left.24}"
+                                    Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}">
+                        <!-- Enter і Ctrl+S діють лише у формі: Enter у полі пошуку нічого не зберігає. -->
+                        <ContentControl.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SaveCommand}" />
+                            <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+                        </ContentControl.InputBindings>
+                        <DockPanel>
+                            <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding}" ContentTemplate="{StaticResource FormActions}" />
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding FormTitle}" />
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{StaticResource Width.StyleCode}" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Код" />
+                                            <TextBox Style="{StaticResource InputBox}"
+                                                     Tag="21A"
+                                                     Text="{Binding Form.Code, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Назва" />
+                                            <TextBox Style="{StaticResource InputBox}"
+                                                     Tag="Назва стилю"
+                                                     Text="{Binding Form.Name, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Margin="{StaticResource Gap.Left.16}">
+                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Категорія" />
+                                            <TextBox Style="{StaticResource InputBox}"
+                                                     Tag="Категорія BJCP"
+                                                     Text="{Binding Form.Category, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{StaticResource Width.RangeLabel}" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="1" Style="{StaticResource FieldLabel}" Text="Від" />
+                                        <TextBlock Grid.Column="2"
+                                                   Style="{StaticResource FieldLabel}"
+                                                   Padding="{StaticResource Gap.Left.8}"
+                                                   Text="До" />
+                                    </Grid>
+                                    <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Form.Ranges}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="{StaticResource Gap.Bottom.4}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{StaticResource Width.RangeLabel}" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Style="{StaticResource Body}" VerticalAlignment="Center" Text="{Binding Label}" />
+                                                    <TextBox Grid.Column="1" Style="{StaticResource NumberBox.Cell}" DataContext="{Binding Min}" />
+                                                    <TextBox Grid.Column="2"
+                                                             Style="{StaticResource NumberBox.Cell}"
+                                                             Margin="{StaticResource Gap.Left.8}"
+                                                             DataContext="{Binding Max}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </ContentControl>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Інгредієнти">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{StaticResource Width.ListPane}" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Style="{StaticResource SegmentedGroup}" Margin="{StaticResource Gap.Bottom.16}">
+                            <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Kinds}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <RadioButton Style="{StaticResource SegmentedButton}"
+                                                     Content="{Binding Title}"
+                                                     GroupName="IngredientKind"
+                                                     IsChecked="{Binding IsSelected}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                        <ContentPresenter Content="{Binding SelectedKind}" ContentTemplate="{StaticResource SectionList}" />
+                    </DockPanel>
+
+                    <ContentControl Grid.Column="1"
+                                    DataContext="{Binding SelectedKind}"
+                                    Style="{StaticResource Card}"
+                                    Margin="{StaticResource Gap.Left.24}"
+                                    Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}">
+                        <ContentControl.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SaveCommand}" />
+                            <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+                        </ContentControl.InputBindings>
+                        <DockPanel>
+                            <ContentPresenter DockPanel.Dock="Bottom" Content="{Binding}" ContentTemplate="{StaticResource FormActions}" />
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding FormTitle}" />
+
+                                    <TextBlock Style="{StaticResource FieldLabel}" Text="Назва" />
+                                    <TextBox Style="{StaticResource InputBox}"
+                                             Tag="Назва інгредієнта"
+                                             Text="{Binding Form.Name, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <ContentPresenter Content="{Binding Form}" />
+
+                                    <Border Style="{StaticResource Divider}" Margin="{StaticResource Gap.Top.24}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Остання ціна" />
+                                            <TextBlock Style="{StaticResource Body}" Text="{Binding Form.LastPrice}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                                            <TextBlock Style="{StaticResource FieldLabel}" Text="Мінімальний запас" />
+                                            <TextBlock Style="{StaticResource Body}" Text="{Binding Form.MinStock}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Style="{StaticResource Caption}"
+                                               Margin="{StaticResource Gap.Top.16}"
+                                               Text="Ціни й мінімальні запаси змінює власник у розділі «Склад». Рецепти зберігають власні значення: зміни характеристик діють лише на нові рядки." />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </ContentControl>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

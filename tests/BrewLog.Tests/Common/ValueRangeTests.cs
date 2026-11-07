@@ -18,25 +18,17 @@ public sealed class ValueRangeTests
     }
 
     [Theory]
-    [InlineData(10.0, 0.0)]
-    [InlineData(15.0, 0.5)]
-    [InlineData(20.0, 1.0)]
-    [InlineData(5.0, 0.0)]
-    [InlineData(25.0, 1.0)]
-    public void Position_AnyValue_ClampedToZeroOne(double value, double expected)
+    [InlineData(10.0, 20.0, 10.0, 0.0)]
+    [InlineData(10.0, 20.0, 15.0, 0.5)]
+    [InlineData(10.0, 20.0, 20.0, 1.0)]
+    [InlineData(10.0, 20.0, 5.0, 0.0)]
+    [InlineData(10.0, 20.0, 25.0, 1.0)]
+    [InlineData(10.0, 10.0, 5.0, 0.0)]
+    [InlineData(10.0, 10.0, 10.0, 0.5)]
+    [InlineData(10.0, 10.0, 15.0, 1.0)]
+    public void Position_AnyValue_ClampedToZeroOneWithoutDividingByZero(double min, double max, double value, double expected)
     {
-        var range = new ValueRange(10, 20);
-
-        Assert.Equal(expected, range.Position(value), 0.0001);
-    }
-
-    [Theory]
-    [InlineData(5.0, 0.0)]
-    [InlineData(10.0, 0.5)]
-    [InlineData(15.0, 1.0)]
-    public void Position_MinEqualsMax_DoesNotDivideByZero(double value, double expected)
-    {
-        var range = new ValueRange(10, 10);
+        var range = new ValueRange(min, max);
 
         Assert.Equal(expected, range.Position(value), 0.0001);
     }

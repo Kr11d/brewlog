@@ -12,6 +12,9 @@ public partial class UsersDialog : Window
         InitializeComponent();
         DataContext = _viewModel = viewModel;
         viewModel.PasswordsCleared += ClearPasswords;
+
+        // Сюди сходяться і Esc, і хрестик заголовка: жоден із них не втратить зміни мовчки.
+        Closing += (_, e) => e.Cancel = !viewModel.ConfirmClose();
     }
 
     /// <summary>PasswordBox не дає прив'язати пароль, тому значення передаються у ViewModel тут.</summary>

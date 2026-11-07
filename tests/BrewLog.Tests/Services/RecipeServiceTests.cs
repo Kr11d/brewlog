@@ -62,7 +62,7 @@ public sealed class RecipeServiceTests : IDisposable
 
         Assert.Equal("American IPA (копія)", copy.Name);
         Assert.NotEqual(original.Id, copy.Id);
-        Assert.Equal(5, original.Ingredients[0].Amount);
+        Assert.Equal(5, original.Ingredients[0].Amount, 0.0001);
         Assert.Equal(2, _recipes.GetAll().Count);
     }
 
@@ -124,7 +124,7 @@ public sealed class RecipeServiceTests : IDisposable
         Assert.Equal(1, result.NewCatalogItems);
         Assert.Equal(2, result.RecipeIds.Count);
         var nelson = _catalog.FindByName(IngredientKind.Hop, "Nelson")!;
-        Assert.Equal(0, nelson.Amount);
+        Assert.Equal(0, nelson.Amount, 0.0001);
         Assert.Equal(2, _catalog.GetAll().Count);
         var first = _recipes.GetById(result.RecipeIds[0])!;
         Assert.Equal(pilsner.Id, first.IngredientsOf<Malt>()[0].CatalogId);

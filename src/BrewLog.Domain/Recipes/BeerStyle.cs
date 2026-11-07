@@ -5,6 +5,12 @@ namespace BrewLog.Domain.Recipes;
 /// <summary>Стиль пива з настанов BJCP: код, назва й допустимі діапазони показників.</summary>
 public sealed class BeerStyle : IEntity
 {
+    private static readonly ValueRange OgLimits = new(1.000, 1.200);
+    private static readonly ValueRange FgLimits = new(0.990, 1.100);
+    private static readonly ValueRange AbvLimits = new(0, 25);
+    private static readonly ValueRange IbuLimits = new(0, 150);
+    private static readonly ValueRange SrmLimits = new(0, 100);
+
     public int Id { get; set; }
 
     /// <summary>Код BJCP, наприклад «21A».</summary>
@@ -24,6 +30,8 @@ public sealed class BeerStyle : IEntity
 
     public ValueRange SrmRange { get; set; }
 
+    public BeerStyle Clone() => (BeerStyle)MemberwiseClone();
+
     /// <summary>Повертає список помилок українською; порожній список означає, що стиль коректний.</summary>
     public IReadOnlyList<string> Validate()
     {
@@ -38,17 +46,30 @@ public sealed class BeerStyle : IEntity
             errors.Add("Вкажіть назву стилю.");
         }
 
-        (string Parameter, ValueRange Range)[] ranges =
+        if (string.IsNullOrWhiteSpace(Category))
+        {
+            errors.Add("Вкажіть категорію стилю.");
+        }
+
+        (string Parameter, ValueRange Range, ValueRange Limits, string LimitsText)[] ranges =
         [
-            ("OG", OgRange),
-            ("FG", FgRange),
-            ("ABV", AbvRange),
-            ("IBU", IbuRange),
-            ("SRM", SrmRange),
+            ("OG", OgRange, OgLimits, "від 1,000 до 1,200"),
+            ("FG", FgRange, FgLimits, "від 0,990 до 1,100"),
+            ("ABV", AbvRange, AbvLimits, "від 0 до 25 %"),
+            ("IBU", IbuRange, IbuLimits, "від 0 до 150"),
+            ("SRM", SrmRange, SrmLimits, "від 0 до 100"),
         ];
-        errors.AddRange(ranges
-            .Where(item => !(item.Range.Min <= item.Range.Max))
-            .Select(item => $"{item.Parameter}: нижня межа не може бути більшою за верхню."));
+        foreach (var (parameter, range, limits, limitsText) in ranges)
+        {
+            if (!limits.Contains(range.Min) || !limits.Contains(range.Max))
+            {
+                errors.Add($"{parameter}: межі мають бути {limitsText}.");
+            }
+            else if (range.Min > range.Max)
+            {
+                errors.Add($"{parameter}: нижня межа не може бути більшою за верхню.");
+            }
+        }
 
         return errors;
     }

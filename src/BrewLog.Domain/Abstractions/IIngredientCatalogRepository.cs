@@ -15,4 +15,7 @@ public interface IIngredientCatalogRepository : IRepository<Ingredient>
 
     /// <summary>Остання ціна за одиницю, грн, для кожної позиції довідника за її ідентифікатором.</summary>
     IReadOnlyDictionary<int, decimal> GetLastPrices();
+
+    /// <summary>Мінімальний запас в одиницях складу для кожної позиції довідника за її ідентифікатором.</summary>
+    IReadOnlyDictionary<int, double> GetMinStocks();
 }

@@ -5,7 +5,7 @@ namespace BrewLog.Tests.Data;
 public sealed class DatabaseInitializerTests
 {
     [Fact]
-    public void Initialize_NewDatabase_CreatesAllTables()
+    public void Initialize_NewDatabase_CreatesAllTablesWithForeignKeysOn()
     {
         using var database = new TempDatabase();
         using var connection = database.Connections.Open();
@@ -28,16 +28,6 @@ public sealed class DatabaseInitializerTests
             "users",
         ];
         Assert.Equal(expected, tables);
-    }
-
-    [Fact]
-    public void Open_NewConnection_EnablesForeignKeys()
-    {
-        using var database = new TempDatabase();
-        using var connection = database.Connections.Open();
-
-        var foreignKeys = connection.ExecuteScalar<int>("PRAGMA foreign_keys;");
-
-        Assert.Equal(1, foreignKeys);
+        Assert.Equal(1, connection.ExecuteScalar<int>("PRAGMA foreign_keys;"));
     }
 }

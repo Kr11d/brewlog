@@ -205,8 +205,16 @@ public sealed partial class RecipesViewModel : ObservableObject
         }
     }
 
+    /// <summary>Після закриття діалогу перечитує рецепти: назви стилів і фільтр могли змінитися, а показники рахуються наново.</summary>
     [RelayCommand]
-    private void OpenReferences() => _dialogs.ShowInfo("Буде в B11", "Довідники");
+    private void OpenReferences()
+    {
+        if (CanEditReferences)
+        {
+            _windows.ShowReferences();
+            Reload();
+        }
+    }
 
     private static string DescribeImport(RecipeImportResult result)
     {

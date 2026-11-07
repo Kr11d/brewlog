@@ -23,7 +23,7 @@
         <DockPanel Grid.Row="1">
             <TextBox x:Name="SearchInput"
                      DockPanel.Dock="Top"
-                     Style="{StaticResource InputBox}"
+                     Style="{StaticResource SearchBox}"
                      Tag="Пошук за ім'ям або логіном"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             <Button DockPanel.Dock="Top"
@@ -40,14 +40,14 @@
                                 <Button Style="{StaticResource ListRowCard.Selectable}" Command="{Binding SelectCommand}">
                                     <DockPanel>
                                         <ContentControl DockPanel.Dock="Left"
-                                                        Style="{StaticResource Avatar}"
+                                                        Style="{StaticResource Avatar.Row}"
                                                         VerticalAlignment="Top"
                                                         Content="{Binding FullName, Converter={StaticResource Initials}}" />
                                         <StackPanel Margin="{StaticResource Gap.Left.12}">
                                             <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding FullName}" />
                                             <TextBlock Style="{StaticResource Caption}" Text="{Binding Login}" />
                                             <StackPanel Margin="{StaticResource Gap.Top.8}" Orientation="Horizontal">
-                                                <ContentControl Style="{StaticResource Chip.Accent}" Content="{Binding RoleDisplayName}" />
+                                                <ContentControl Style="{StaticResource Chip.Row}" Content="{Binding RoleDisplayName}" />
                                                 <ContentControl Style="{StaticResource Chip}"
                                                                 Margin="{StaticResource Gap.Left.8}"
                                                                 Content="вимкнено"
@@ -74,58 +74,72 @@
                         Style="{StaticResource Card}"
                         Margin="{StaticResource Gap.Left.24}"
                         Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibility}}">
-            <!-- Форма нового запису з двома паролями вища за низьке вікно: тоді вона прокручується. -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding FormTitle}" />
-
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Ім'я" />
-                    <TextBox Style="{StaticResource InputBox}"
-                             Tag="Ім'я та прізвище"
-                             Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Логін" />
-                    <TextBox Style="{StaticResource InputBox}"
-                             IsEnabled="{Binding IsNew}"
-                             Tag="3–32 латинські літери або цифри"
-                             Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Style="{StaticResource FieldLabel}" Text="Роль" />
-                    <ComboBox Style="{StaticResource InputCombo}"
-                              DisplayMemberPath="DisplayName"
-                              ItemsSource="{Binding Roles}"
-                              SelectedItem="{Binding SelectedRole}"
-                              Tag="Оберіть роль" />
-
-                    <CheckBox Style="{StaticResource ToggleSwitch}"
-                              Margin="{StaticResource Gap.Top.24}"
-                              Content="Активний"
-                              IsChecked="{Binding IsActive}"
-                              Visibility="{Binding IsExisting, Converter={StaticResource BoolToVisibility}}" />
-
-                    <StackPanel Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="Пароль" />
-                        <PasswordBox x:Name="NewPasswordInput"
-                                     Style="{StaticResource InputPassword}"
-                                     Tag="Щонайменше 6 символів"
-                                     PasswordChanged="OnNewPasswordChanged" />
-                        <TextBlock Style="{StaticResource FieldLabel}" Text="Підтвердження пароля" />
-                        <PasswordBox x:Name="ConfirmPasswordInput"
-                                     Style="{StaticResource InputPassword}"
-                                     Tag="Повторіть пароль"
-                                     PasswordChanged="OnConfirmPasswordChanged" />
-                    </StackPanel>
-
-                    <StackPanel Margin="{StaticResource Gap.Top.32}" Orientation="Horizontal">
-                        <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" Content="Зберегти" />
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Margin="{StaticResource Gap.Left.8}"
-                                Command="{Binding ResetPasswordCommand}"
-                                Content="Скинути пароль"
-                                Visibility="{Binding IsExisting, Converter={StaticResource BoolToVisibility}}" />
-                    </StackPanel>
+            <!-- Enter і Ctrl+S діють лише у формі: Enter у полі пошуку нічого не зберігає. -->
+            <ContentControl.InputBindings>
+                <KeyBinding Key="Return" Command="{Binding SaveCommand}" />
+                <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
+            </ContentControl.InputBindings>
+            <!-- Дії лишаються видимими, навіть коли у низькому вікні поля прокручуються. -->
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Margin="{StaticResource Gap.Top.16}" Orientation="Horizontal">
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveCommand}" Content="Зберегти" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Margin="{StaticResource Gap.Left.8}"
+                            Command="{Binding ResetPasswordCommand}"
+                            Content="Скинути пароль"
+                            Visibility="{Binding IsExisting, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
-            </ScrollViewer>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding FormTitle}" />
+
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="Ім'я" />
+                        <TextBox Style="{StaticResource InputBox}"
+                                 Tag="Ім'я та прізвище"
+                                 Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="Логін" />
+                        <TextBox Style="{StaticResource InputBox}"
+                                 IsEnabled="{Binding IsNew}"
+                                 Tag="3–32 латинські літери або цифри"
+                                 Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="Роль" />
+                        <ComboBox Style="{StaticResource InputCombo}"
+                                  DisplayMemberPath="DisplayName"
+                                  ItemsSource="{Binding Roles}"
+                                  SelectedItem="{Binding SelectedRole}"
+                                  Tag="Оберіть роль" />
+
+                        <CheckBox Style="{StaticResource ToggleSwitch}"
+                                  Margin="{StaticResource Gap.Top.24}"
+                                  Content="Активний"
+                                  IsChecked="{Binding IsActive}"
+                                  Visibility="{Binding IsExisting, Converter={StaticResource BoolToVisibility}}" />
+
+                        <Grid Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Пароль" />
+                                <PasswordBox x:Name="NewPasswordInput"
+                                             Style="{StaticResource InputPassword}"
+                                             Tag="Щонайменше 6 символів"
+                                             PasswordChanged="OnNewPasswordChanged" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                                <TextBlock Style="{StaticResource FieldLabel}" Text="Підтвердження пароля" />
+                                <PasswordBox x:Name="ConfirmPasswordInput"
+                                             Style="{StaticResource InputPassword}"
+                                             Tag="Повторіть пароль"
+                                             PasswordChanged="OnConfirmPasswordChanged" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
         </ContentControl>
     </Grid>
 </Window>

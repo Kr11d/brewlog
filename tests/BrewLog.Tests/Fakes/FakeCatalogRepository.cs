@@ -19,4 +19,6 @@ public sealed class FakeCatalogRepository : InMemoryRepository<Ingredient>, IIng
     public bool IsUsed(int id) => UsedIds.Contains(id);
 
     public IReadOnlyDictionary<int, decimal> GetLastPrices() => LastPrices;
+
+    public IReadOnlyDictionary<int, double> GetMinStocks() => new Dictionary<int, double>();
 }

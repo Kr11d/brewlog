@@ -20,9 +20,10 @@ public sealed partial class NumberField : ObservableObject
     /// <param name="initial">Початкове значення; виклику apply і changed воно не спричиняє.</param>
     /// <param name="apply">Передає власнику правильне значення.</param>
     /// <param name="changed">Викликається на кожну зміну тексту, навіть неправильну.</param>
-    public NumberField(double initial, Action<double> apply, Action changed)
+    /// <param name="format">Як показати початкове значення; типово DisplayFormat.Number.</param>
+    public NumberField(double initial, Action<double> apply, Action changed, Func<double, string>? format = null)
     {
-        _text = DisplayFormat.Number(initial);
+        _text = (format ?? DisplayFormat.Number)(initial);
         _apply = apply;
         _changed = changed;
     }

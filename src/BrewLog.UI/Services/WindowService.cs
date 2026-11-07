@@ -3,6 +3,7 @@ using BrewLog.Domain.Common;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Login;
 using BrewLog.UI.Features.RecipeEditor;
+using BrewLog.UI.Features.References;
 using BrewLog.UI.Features.Users;
 using BrewLog.UI.Shell;
 
@@ -77,6 +78,10 @@ public sealed class WindowService
             : null;
         return new RecipeEditorWindow(new RecipeEditorViewModel(_services.Recipes, _services.Catalog, _services.Dialogs, recipe));
     }
+
+    public void ShowReferences() => ModalWindow.Show(CreateReferencesDialog());
+
+    public ReferencesDialog CreateReferencesDialog() => new(new ReferencesViewModel(_services.Catalog, _services.Dialogs));
 
     public void ShowUsers() => ModalWindow.Show(CreateUsersDialog());
 
