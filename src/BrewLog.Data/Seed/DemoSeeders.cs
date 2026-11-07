@@ -11,6 +11,7 @@ public static class DemoSeeders
 {
     public static IReadOnlyList<ISeeder> All(IPasswordHasher passwordHasher) =>
     [
+        new UserSeeder(passwordHasher),
         new CatalogSeeder(),
         new RecipeSeeder(),
     ];

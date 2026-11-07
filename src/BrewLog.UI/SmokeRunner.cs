@@ -74,6 +74,7 @@ public static class SmokeRunner
             var services = new AppServices(databasePath, pooling: false);
             services.InitializeDatabase();
             log.WriteLine($"OK: БД ініціалізовано ({databasePath})");
+            SignInDemoUsers(services, log);
             LogDemoRecipes(services, log);
 
             var failures = Targets(services).Count(target => !TryCreate(target.Name, target.Create, log));
@@ -87,6 +88,21 @@ public static class SmokeRunner
         finally
         {
             File.Delete(databasePath);
+        }
+    }
+
+    /// <summary>
+    /// Перевіряє вхід кожного демо-користувача (HANDOFF §3.3) і пише його роль та розділи меню.
+    /// Наостанок лишає в сесії пивовара: він бачить рецепти, а оболонка отримує справжнє меню.
+    /// </summary>
+    private static void SignInDemoUsers(AppServices services, TextWriter log)
+    {
+        (string Login, string Password)[] demoAccounts = [("owner", "owner123"), ("assistant", "assistant123"), ("brewer", "brewer123")];
+        foreach (var (login, password) in demoAccounts)
+        {
+            var user = services.Auth.Login(login, password);
+            services.Session.SignIn(user);
+            log.WriteLine($"OK: вхід «{login}» — {user.RoleDisplayName}, розділи: {string.Join(", ", user.Sections)}");
         }
     }
 

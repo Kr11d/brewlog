@@ -21,11 +21,14 @@ public sealed class AppServices
         Clock = new SystemClock();
         PasswordHasher = new BCryptPasswordHasher();
         Connections = new SqliteConnectionFactory(databasePath, pooling);
-        Session = new AllowAllSession();
+        Session = new CurrentSession();
 
+        var users = new UserRepository(Connections);
         var styles = new StyleRepository(Connections);
         var catalog = new IngredientCatalogRepository(Connections);
         var recipes = new RecipeRepository(Connections);
+        Auth = new AuthService(users, PasswordHasher);
+        Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
         Recipes = new RecipeService(recipes, catalog, Session, Clock);
 
@@ -41,7 +44,12 @@ public sealed class AppServices
 
     public SqliteConnectionFactory Connections { get; }
 
-    public ICurrentSession Session { get; }
+    /// <summary>Конкретний тип, а не ICurrentSession: вхід і вихід (SignIn, SignOut) виконує інтерфейс.</summary>
+    public CurrentSession Session { get; }
+
+    public AuthService Auth { get; }
+
+    public UserService Users { get; }
 
     public CatalogService Catalog { get; }
 

@@ -21,7 +21,7 @@ public sealed partial class MainViewModel : ObservableObject
         _windows = windows;
 
         UserName = session.User?.FullName ?? "Гість";
-        UserRole = "Усі розділи відкрито";
+        UserRole = session.User?.RoleDisplayName ?? string.Empty;
         MenuItems = session.Sections.Select(section => new MenuItemViewModel(SectionCatalog.Get(section), OpenSection)).ToList();
 
         if (session.Sections.Count > 0)
@@ -36,7 +36,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public string UserRole { get; }
 
-    /// <summary>Заглушка сесії не має кого виводити; справжній вихід з'явиться в B6.</summary>
+    /// <summary>Вихід з'явиться в B6 разом із вікном входу.</summary>
     [RelayCommand]
     private void SignOut()
     {
