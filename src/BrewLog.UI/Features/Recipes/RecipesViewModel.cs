@@ -81,20 +81,36 @@ public sealed partial class RecipesViewModel : ObservableObject
     partial void OnSelectedStyleFilterChanged(StyleFilterOption? value) => ApplyFilter();
 
     [RelayCommand]
-    private void NewRecipe()
-    {
-        if (CanEditRecipes && _windows.ShowRecipeEditor(null))
-        {
-            Reload();
-        }
-    }
+    private void NewRecipe() => OpenEditor(null);
 
     [RelayCommand]
     private void Edit()
     {
-        if (CanEditRecipes && SelectedRow is { } row && _windows.ShowRecipeEditor(row.Id))
+        if (SelectedRow is { } row)
         {
-            Reload(row.Id);
+            OpenEditor(row.Id);
+        }
+    }
+
+    /// <summary>Відкриває редактор; після збереження перечитує дані й лишає вибраним збережений рецепт.</summary>
+    private void OpenEditor(int? id)
+    {
+        if (!CanEditRecipes)
+        {
+            return;
+        }
+
+        try
+        {
+            if (_windows.ShowRecipeEditor(id, out var savedId))
+            {
+                Reload(savedId);
+            }
+        }
+        catch (DomainException exception)
+        {
+            _dialogs.ShowError(exception.Message);
+            Reload();
         }
     }
 

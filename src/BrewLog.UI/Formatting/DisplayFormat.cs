@@ -8,7 +8,23 @@ namespace BrewLog.UI.Formatting;
 /// </summary>
 public static class DisplayFormat
 {
+    private const NumberStyles InputStyles =
+        NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
+
     private static readonly CultureInfo Culture = CultureInfo.GetCultureInfo("uk-UA");
+
+    /// <summary>Значення для поля вводу, без зайвих нулів: «12,5», «60».</summary>
+    public static string Number(double value) => value.ToString("0.###", Culture);
+
+    /// <summary>
+    /// Читає число, яке друкує користувач: підходять і кома, і крапка.
+    /// Межі потрібні, бо собівартість рахується на кожну клавішу, а надто велике чи мале число переповнило б decimal.
+    /// </summary>
+    public static bool TryParseNumber(string? text, out double value)
+    {
+        var isNumber = double.TryParse(text?.Replace('.', ','), InputStyles, Culture, out value);
+        return isNumber && (value == 0 || Math.Abs(value) is >= 1e-6 and <= 1e9);
+    }
 
     /// <summary>Густина: «1,048».</summary>
     public static string Gravity(double value) => value.ToString("0.000", Culture);

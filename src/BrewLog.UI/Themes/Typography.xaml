@@ -31,6 +31,7 @@
     <sys:String x:Key="Glyph.Key">&#xE8D7;</sys:String>
     <sys:String x:Key="Glyph.Search">&#xE721;</sys:String>
     <sys:String x:Key="Glyph.Recipe">&#xE82D;</sys:String>
+    <sys:String x:Key="Glyph.Delete">&#xE74D;</sys:String>
 
     <!--
       Стилі тексту. PageTitle, SectionTitle, Body і BigNumber не задають колір: він успадковується,
@@ -87,6 +88,16 @@
             <Trigger Property="Text" Value="">
                 <Setter Property="Visibility" Value="Collapsed" />
             </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Підпис шкали стилю: контекст даних має властивість IsWithin. -->
+    <Style x:Key="Caption.StyleRange" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Foreground" Value="{StaticResource Success}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsWithin}" Value="False">
+                <Setter Property="Foreground" Value="{StaticResource Danger}" />
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 
