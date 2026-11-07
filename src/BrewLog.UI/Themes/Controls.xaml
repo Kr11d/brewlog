@@ -7,26 +7,35 @@
     <!--
       Як користуватися темою.
       Стилі, які підключаються явно:
-        ContentControl: Card, DocCard, Chip (+ .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
-                        IconBadge, IconBadge.Large, Avatar, LogoMark
-        Button:         PrimaryButton, SecondaryButton, TextButton, IconButton, ListRowCard, MenuButton
+        ContentControl: Card, DocCard, Chip (+ .Accent .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
+                        IconBadge, IconBadge.Large, Avatar, LogoMark, LogoMark.Large
+        Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, ListRowCard, ListRowCard.Selectable, MenuButton
         TextBox:        InputBox, InputArea (плейсхолдер у Tag)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
         ComboBox:       InputCombo (плейсхолдер у Tag)
+        CheckBox:       ToggleSwitch (перемикач «увімкнено / вимкнено»)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
         Border:         Divider
-        Window:         BrewWindow, MessageWindow
+        Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush)
+        Window:         BrewWindow, LoginWindow, DialogWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
       Таблиця — CleanDataGrid у DataGrid.xaml; стилі тексту — у Typography.xaml.
     -->
 
     <converters:InitialsConverter x:Key="Initials" />
+    <converters:SrmToBrushConverter x:Key="SrmToBrush" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!-- Розміри -->
     <sys:Double x:Key="Size.Control">48</sys:Double>
     <sys:Double x:Key="Size.ControlSmall">40</sys:Double>
     <GridLength x:Key="Width.Menu">260</GridLength>
+    <sys:Double x:Key="Width.LoginCard">420</sys:Double>
+    <GridLength x:Key="Width.ListPane">380</GridLength>
+    <GridLength x:Key="Width.PreviewPane">360</GridLength>
+    <GridLength x:Key="Width.Filter">300</GridLength>
+    <sys:Double x:Key="Opacity.Muted">0.55</sys:Double>
+    <sys:Double x:Key="Size.LogoLarge">64</sys:Double>
 
     <CornerRadius x:Key="Radius.Card">24</CornerRadius>
     <CornerRadius x:Key="Radius.Pill">24</CornerRadius>
@@ -40,6 +49,8 @@
     <Thickness x:Key="Pad.Shell">16</Thickness>
     <Thickness x:Key="Pad.Content">32,16,16,16</Thickness>
     <Thickness x:Key="Pad.Card">24</Thickness>
+    <Thickness x:Key="Pad.CardLarge">32</Thickness>
+    <Thickness x:Key="Pad.Dialog">32,24,32,32</Thickness>
     <Thickness x:Key="Pad.Menu">16</Thickness>
     <Thickness x:Key="Pad.DialogShadow">24</Thickness>
     <Thickness x:Key="Pad.Button">28,0</Thickness>
@@ -51,13 +62,19 @@
     <Thickness x:Key="Gap.Top.8">0,8,0,0</Thickness>
     <Thickness x:Key="Gap.Top.16">0,16,0,0</Thickness>
     <Thickness x:Key="Gap.Top.24">0,24,0,0</Thickness>
+    <Thickness x:Key="Gap.Top.32">0,32,0,0</Thickness>
+    <Thickness x:Key="Gap.Bottom.4">0,0,0,4</Thickness>
     <Thickness x:Key="Gap.Bottom.8">0,0,0,8</Thickness>
     <Thickness x:Key="Gap.Bottom.16">0,0,0,16</Thickness>
     <Thickness x:Key="Gap.Bottom.24">0,0,0,24</Thickness>
+    <Thickness x:Key="Gap.Left.4">4,0,0,0</Thickness>
     <Thickness x:Key="Gap.Left.8">8,0,0,0</Thickness>
     <Thickness x:Key="Gap.Left.12">12,0,0,0</Thickness>
     <Thickness x:Key="Gap.Left.16">16,0,0,0</Thickness>
+    <Thickness x:Key="Gap.Left.24">24,0,0,0</Thickness>
+    <Thickness x:Key="Gap.Right.4">0,0,4,0</Thickness>
     <Thickness x:Key="Gap.Right.8">0,0,8,0</Thickness>
+    <Thickness x:Key="Gap.Sides.4">4,0,4,0</Thickness>
 
     <!-- Тіні -->
     <DropShadowEffect x:Key="Shadow.Card" BlurRadius="36" ShadowDepth="8" Direction="270" Opacity="0.07" Color="{StaticResource Shadow.Color}" />
@@ -112,6 +129,24 @@
         <Setter Property="controls:WindowCaption.Foreground" Value="{StaticResource Text.Primary.Color}" />
     </Style>
 
+    <!-- Вікно входу: компактне, без зміни розміру; картка входу стоїть по центру градієнта. -->
+    <Style x:Key="LoginWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
+        <Setter Property="Width" Value="560" />
+        <Setter Property="Height" Value="760" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="ResizeMode" Value="CanMinimize" />
+    </Style>
+
+    <!-- Модальний діалог із системним заголовком, наприклад «Користувачі» чи «Довідники». -->
+    <Style x:Key="DialogWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
+        <Setter Property="Width" Value="1040" />
+        <Setter Property="Height" Value="720" />
+        <Setter Property="MinWidth" Value="880" />
+        <Setter Property="MinHeight" Value="600" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+    </Style>
+
     <!-- Вікно-картка без заголовка; прозорий край лишає місце для тіні. -->
     <Style x:Key="MessageWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
         <Setter Property="Background" Value="Transparent" />
@@ -153,6 +188,22 @@
     <Style x:Key="DocCard" TargetType="ContentControl" BasedOn="{StaticResource Card}">
         <Setter Property="Background" Value="{StaticResource DocCard.Gradient}" />
         <Setter Property="Foreground" Value="{StaticResource Text.OnAccent}" />
+    </Style>
+
+    <!-- Кольорова плашка пива -->
+    <Style x:Key="Swatch" TargetType="Ellipse">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Stroke" Value="{StaticResource Border}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="Swatch.Large" TargetType="Ellipse" BasedOn="{StaticResource Swatch}">
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="Stroke" Value="{StaticResource Text.OnAccent.Muted}" />
+        <Setter Property="StrokeThickness" Value="2" />
     </Style>
 
     <Style x:Key="Divider" TargetType="Border">
@@ -222,6 +273,11 @@
                 <Setter Property="Cursor" Value="Arrow" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- Вужча другорядна кнопка: для кількох дій поряд у вузькій панелі. -->
+    <Style x:Key="SecondaryButton.Compact" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+        <Setter Property="Padding" Value="{StaticResource Pad.ButtonSmall}" />
     </Style>
 
     <Style x:Key="TextButton" TargetType="Button" BasedOn="{StaticResource PillButton}">
@@ -338,6 +394,21 @@
                 <Setter Property="Foreground" Value="{StaticResource Text.Disabled}" />
                 <Setter Property="Cursor" Value="Arrow" />
             </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+      Рядок-картка списку з вибором. Контекст даних має властивості IsSelected (виділити)
+      та IsMuted (приглушити, наприклад вимкнений обліковий запис).
+    -->
+    <Style x:Key="ListRowCard.Selectable" TargetType="Button" BasedOn="{StaticResource ListRowCard}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                <Setter Property="Opacity" Value="{StaticResource Opacity.Muted}" />
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 
@@ -960,6 +1031,51 @@
         </Setter>
     </Style>
 
+    <!-- Перемикач «увімкнено / вимкнено» на основі CheckBox -->
+    <Style x:Key="ToggleSwitch" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource Text.Primary}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing.Box}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Background="Transparent" Orientation="Horizontal">
+                        <Grid Width="44" Height="24" VerticalAlignment="Center">
+                            <Border x:Name="Track" Background="{StaticResource Border}" CornerRadius="12" />
+                            <Ellipse x:Name="Thumb"
+                                     Width="18"
+                                     Height="18"
+                                     Margin="3,0"
+                                     HorizontalAlignment="Left"
+                                     Fill="{StaticResource Surface}" />
+                        </Grid>
+                        <ContentPresenter Margin="12,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Text.Disabled}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent}" />
+                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="IsChecked" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent.Hover}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Сегменти: RadioButton-и всередині спільної підкладки, наприклад «Дошка / Список» -->
     <Style x:Key="SegmentedGroup" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
@@ -1027,6 +1143,10 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Chip.Accent" TargetType="ContentControl" BasedOn="{StaticResource Chip}">
+        <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+    </Style>
     <Style x:Key="Chip.Planned" TargetType="ContentControl" BasedOn="{StaticResource Chip}">
         <Setter Property="Background" Value="{StaticResource Stage.Planned.Soft}" />
         <Setter Property="Foreground" Value="{StaticResource Stage.Planned}" />
@@ -1100,17 +1220,18 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- Розмір значка келиха задає Padding: так одна розмітка служить і меню, і вікну входу. -->
     <Style x:Key="LogoMark" TargetType="ContentControl">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Width" Value="{StaticResource Size.ControlSmall}" />
         <Setter Property="Height" Value="{StaticResource Size.ControlSmall}" />
+        <Setter Property="Padding" Value="8" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContentControl">
                     <Border Background="{StaticResource DocCard.Gradient}" CornerRadius="{StaticResource Radius.Input}">
-                        <Path Width="24"
-                              Height="24"
+                        <Path Margin="{TemplateBinding Padding}"
                               Data="{StaticResource Geometry.Mug}"
                               Stretch="Uniform"
                               Stroke="{StaticResource Text.OnAccent}"
@@ -1122,6 +1243,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="LogoMark.Large" TargetType="ContentControl" BasedOn="{StaticResource LogoMark}">
+        <Setter Property="Width" Value="{StaticResource Size.LogoLarge}" />
+        <Setter Property="Height" Value="{StaticResource Size.LogoLarge}" />
+        <Setter Property="Padding" Value="14" />
     </Style>
 
     <!-- Тонка смуга прокрутки для всіх ScrollViewer -->

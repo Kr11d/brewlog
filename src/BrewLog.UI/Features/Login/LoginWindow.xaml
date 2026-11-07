@@ -1,0 +1,56 @@
+<Window x:Class="BrewLog.UI.Features.Login.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Вхід — BrewLog"
+        Style="{StaticResource LoginWindow}"
+        WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=LoginInput}">
+    <StackPanel Width="{StaticResource Width.LoginCard}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+        <ContentControl Style="{StaticResource Card}" Padding="{StaticResource Pad.CardLarge}">
+            <StackPanel>
+                <ContentControl Style="{StaticResource LogoMark.Large}" HorizontalAlignment="Center" />
+                <TextBlock Style="{StaticResource PageTitle}"
+                           Margin="{StaticResource Gap.Top.16}"
+                           HorizontalAlignment="Center"
+                           Text="BrewLog" />
+                <TextBlock Style="{StaticResource PageSubtitle}"
+                           Margin="{StaticResource Gap.Top.4}"
+                           HorizontalAlignment="Center"
+                           Text="Облік виробництва броварні" />
+
+                <TextBox x:Name="LoginInput"
+                         Style="{StaticResource InputBox}"
+                         Margin="{StaticResource Gap.Top.32}"
+                         Tag="Логін"
+                         Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" />
+                <PasswordBox Style="{StaticResource InputPassword}"
+                             Margin="{StaticResource Gap.Top.16}"
+                             Tag="Пароль"
+                             PasswordChanged="OnPasswordChanged" />
+                <CheckBox Margin="{StaticResource Gap.Top.16}"
+                          Content="Запам'ятати мене"
+                          IsChecked="{Binding RememberMe}" />
+
+                <Button Style="{StaticResource PrimaryButton}"
+                        Margin="{StaticResource Gap.Top.24}"
+                        Command="{Binding SignInCommand}"
+                        Content="Увійти"
+                        IsDefault="True" />
+                <TextBlock Style="{StaticResource ErrorText}"
+                           Margin="{StaticResource Gap.Top.16}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Text="{Binding ErrorMessage}" />
+            </StackPanel>
+        </ContentControl>
+
+        <TextBlock Style="{StaticResource Caption}"
+                   Margin="{StaticResource Gap.Top.16}"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   Text="{Binding DemoHint}"
+                   Visibility="{Binding HasDemoHint, Converter={StaticResource BoolToVisibility}}" />
+    </StackPanel>
+</Window>

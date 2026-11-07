@@ -16,6 +16,7 @@
     <sys:Double x:Key="FontSize.Title">30</sys:Double>
     <sys:Double x:Key="FontSize.BigNumber">34</sys:Double>
     <sys:Double x:Key="FontSize.IconLarge">40</sys:Double>
+    <sys:Double x:Key="FontSize.Hero">48</sys:Double>
 
     <!-- Гліфи, якими користується сама тема. Гліфи розділів меню — у Shell/SectionCatalog. -->
     <sys:String x:Key="Glyph.Info">&#xE946;</sys:String>
@@ -27,6 +28,9 @@
     <sys:String x:Key="Glyph.ChevronDown">&#xE70D;</sys:String>
     <sys:String x:Key="Glyph.Calendar">&#xE787;</sys:String>
     <sys:String x:Key="Glyph.SignOut">&#xF3B1;</sys:String>
+    <sys:String x:Key="Glyph.Key">&#xE8D7;</sys:String>
+    <sys:String x:Key="Glyph.Search">&#xE721;</sys:String>
+    <sys:String x:Key="Glyph.Recipe">&#xE82D;</sys:String>
 
     <!--
       Стилі тексту. PageTitle, SectionTitle, Body і BigNumber не задають колір: він успадковується,
@@ -67,14 +71,34 @@
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
+    <!-- Підпис над полем форми; відступ зверху відділяє його від попереднього поля. -->
+    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Margin" Value="0,16,0,8" />
+    </Style>
+
     <Style x:Key="Caption.OnAccent" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
         <Setter Property="Foreground" Value="{StaticResource Text.OnAccent.Muted}" />
+    </Style>
+
+    <!-- Повідомлення про помилку під формою; порожній текст не займає місця. -->
+    <Style x:Key="ErrorText" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Foreground" Value="{StaticResource Danger}" />
+        <Style.Triggers>
+            <Trigger Property="Text" Value="">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="BigNumber" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
         <Setter Property="FontSize" Value="{StaticResource FontSize.BigNumber}" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Головне число «документ-картки», наприклад ABV у прев'ю рецепта. -->
+    <Style x:Key="HeroNumber" TargetType="TextBlock" BasedOn="{StaticResource BigNumber}">
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Hero}" />
     </Style>
 
     <Style x:Key="LogoText" TargetType="TextBlock">

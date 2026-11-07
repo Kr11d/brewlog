@@ -1,4 +1,7 @@
 using System.Windows;
+using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Login;
+using BrewLog.UI.Features.Users;
 using BrewLog.UI.Shell;
 
 namespace BrewLog.UI.Services;
@@ -17,16 +20,61 @@ public sealed class WindowService
         _services = services;
     }
 
-    public void ShowMainWindow()
+    public void ShowMainWindow() => ShowAsMain(CreateMainWindow());
+
+    /// <summary>Окремо від показу: smoke-перевірка створює вікно, не показуючи його.</summary>
+    public MainWindow CreateMainWindow()
     {
-        var window = CreateMainWindow();
+        var viewModel = new MainViewModel(_services.Session, _services.Auth, _services.RememberMe, _services.Navigation, this);
+        var window = new MainWindow(viewModel);
+        window.Closed += (_, _) => viewModel.Dispose();
+        return window;
+    }
+
+    public void ShowLoginWindow() => ShowAsMain(CreateLoginWindow());
+
+    /// <summary>Після успішного входу вікно входу саме поступається головним вікном.</summary>
+    public LoginWindow CreateLoginWindow()
+    {
+        var viewModel = new LoginViewModel(_services.Auth, _services.Session, _services.RememberMe);
+        var window = new LoginWindow(viewModel);
+        viewModel.SignedIn += () =>
+        {
+            ShowMainWindow();
+            window.Close();
+        };
+        return window;
+    }
+
+    /// <summary>Після виходу: показує вхід і лише потім закриває головне вікно, щоб застосунок не лишився без вікон.</summary>
+    public void ReturnToLogin()
+    {
+        var mainWindow = Application.Current.MainWindow;
+        ShowLoginWindow();
+        mainWindow?.Close();
+    }
+
+    /// <summary>Редактор рецепта: id = null — новий рецепт; true — рецепт збережено. Вікно з'явиться в B9.</summary>
+    public bool ShowRecipeEditor(int? id)
+    {
+        _services.Dialogs.ShowInfo("Буде в B9", id is null ? "Новий рецепт" : "Редагування рецепта");
+        return false;
+    }
+
+    public void ShowUsers() => ModalWindow.Show(CreateUsersDialog());
+
+    public UsersDialog CreateUsersDialog() =>
+        new(new UsersViewModel(_services.Users, _services.Session, _services.Dialogs, this));
+
+    /// <summary>Діалог нового пароля; true — пароль змінено.</summary>
+    public bool ShowResetPassword(User user) => ModalWindow.Show(CreateResetPasswordDialog(user)) == true;
+
+    public ResetPasswordDialog CreateResetPasswordDialog(User user) =>
+        new(new ResetPasswordViewModel(_services.Users, _services.Dialogs, user));
+
+    private static void ShowAsMain(Window window)
+    {
         Application.Current.MainWindow = window;
         window.Show();
     }
-
-    /// <summary>Окремо від показу: smoke-перевірка створює вікно, не показуючи його.</summary>
-    public MainWindow CreateMainWindow() =>
-        new(new MainViewModel(_services.Session, _services.Navigation, this));
-
-    public void ShowUsers() => _services.Dialogs.ShowInfo("Буде в B7", "Користувачі");
 }
