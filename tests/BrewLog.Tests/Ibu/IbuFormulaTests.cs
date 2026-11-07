@@ -58,8 +58,8 @@ public sealed class IbuFormulaTests
 
         var stats = RecipeCalculator.Calculate(recipe);
 
-        Assert.Equal(0, stats.Ibu);
-        Assert.Equal(0, stats.IbuOf(hop));
+        Assert.Equal(0, stats.Ibu, 0.0001);
+        Assert.Equal(0, stats.IbuOf(hop), 0.0001);
     }
 
     [Fact]

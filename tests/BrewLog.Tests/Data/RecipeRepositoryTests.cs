@@ -43,8 +43,8 @@ public sealed class RecipeRepositoryTests : IDisposable
 
         Assert.NotNull(loaded);
         Assert.Equal("Тестовий ель", loaded.Name);
-        Assert.Equal(23, loaded.BatchVolumeL);
-        Assert.Equal(75, loaded.EfficiencyPercent);
+        Assert.Equal(23, loaded.BatchVolumeL, 0.0001);
+        Assert.Equal(75, loaded.EfficiencyPercent, 0.0001);
         Assert.Equal(90, loaded.BoilTimeMin);
         Assert.Equal("Rager", loaded.IbuFormulaCode);
         Assert.Equal("Нотатка", loaded.Notes);
@@ -75,7 +75,7 @@ public sealed class RecipeRepositoryTests : IDisposable
         Assert.NotNull(loaded);
         Assert.Equal("Новий", loaded.Name);
         var line = Assert.Single(loaded.Ingredients);
-        Assert.Equal(7, line.Amount);
+        Assert.Equal(7, line.Amount, 0.0001);
     }
 
     [Fact]

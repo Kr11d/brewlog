@@ -103,8 +103,8 @@ public sealed class IngredientTests
         copy.Amount = 99;
         copy.YieldPercent = 1;
 
-        Assert.Equal(5, original.Amount);
-        Assert.Equal(80, original.YieldPercent);
+        Assert.Equal(5, original.Amount, 0.0001);
+        Assert.Equal(80, original.YieldPercent, 0.0001);
     }
 
     [Fact]

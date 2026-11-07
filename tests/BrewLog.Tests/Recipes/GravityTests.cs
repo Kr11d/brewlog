@@ -39,8 +39,8 @@ public sealed class GravityTests
     {
         var stats = RecipeCalculator.Calculate(RecipeOf(23, Sucrose()));
 
-        Assert.Equal(0, stats.Mcu);
-        Assert.Equal(0, stats.Srm);
+        Assert.Equal(0, stats.Mcu, 0.0001);
+        Assert.Equal(0, stats.Srm, 0.0001);
     }
 
     [Fact]

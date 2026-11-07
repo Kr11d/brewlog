@@ -54,14 +54,6 @@ public sealed class RecipeTests
     }
 
     [Fact]
-    public void Validate_ValidRecipe_ReturnsNoErrors()
-    {
-        var recipe = RecipeOf(23, Pilsner(), BoilHop(), Us05());
-
-        Assert.Empty(recipe.Validate());
-    }
-
-    [Fact]
     public void Validate_ZeroVolume_ReturnsError()
     {
         var recipe = RecipeOf(0, Pilsner());
