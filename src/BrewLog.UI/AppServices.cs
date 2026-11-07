@@ -22,6 +22,7 @@ public sealed class AppServices
         PasswordHasher = new BCryptPasswordHasher();
         Connections = new SqliteConnectionFactory(databasePath, pooling);
         Session = new CurrentSession();
+        RememberMe = new RememberMeStore(AppPaths.RememberMePath);
 
         var users = new UserRepository(Connections);
         var styles = new StyleRepository(Connections);
@@ -47,6 +48,8 @@ public sealed class AppServices
     /// <summary>Конкретний тип, а не ICurrentSession: вхід і вихід (SignIn, SignOut) виконує інтерфейс.</summary>
     public CurrentSession Session { get; }
 
+    public RememberMeStore RememberMe { get; }
+
     public AuthService Auth { get; }
 
     public UserService Users { get; }
@@ -63,6 +66,29 @@ public sealed class AppServices
 
     /// <summary>Створює схему й демо-дані, якщо файлу БД ще немає.</summary>
     public void InitializeDatabase() => _databaseInitializer.Initialize(Clock.Now.Date);
+
+    /// <summary>
+    /// Автоматичний вхід за збереженим токеном «Запам'ятати мене». Недійсний токен стирається,
+    /// щоб наступний запуск одразу показав вхід, не перевіряючи його знову.
+    /// </summary>
+    public bool TryRestoreSession()
+    {
+        var remembered = RememberMe.Load();
+        if (remembered is null)
+        {
+            return false;
+        }
+
+        var user = Auth.LoginWithToken(remembered.UserId, remembered.Token);
+        if (user is null)
+        {
+            RememberMe.Clear();
+            return false;
+        }
+
+        Session.SignIn(user);
+        return true;
+    }
 
     /// <summary>
     /// Сторінки розділів. Сюди кожен розробник додає свою: [AppSection.Recipes] = () => new RecipesViewModel(...).

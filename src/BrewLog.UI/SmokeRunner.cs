@@ -19,10 +19,13 @@ public static class SmokeRunner
     private static readonly TimeSpan WatchdogTimeout = TimeSpan.FromSeconds(60);
     private static readonly Size LayoutSize = new(1280, 800);
 
-    /// <summary>Усе, що перевіряє smoke: кожне нове вікно додавайте сюди. Сторінки беруться з NavigationService самі.</summary>
-    private static IEnumerable<(string Name, Func<object> Create)> Targets(AppServices services)
+    /// <summary>
+    /// Усе, що перевіряє smoke: кожне нове вікно додавайте сюди. Оболонка й сторінки перевіряються за кожну роль:
+    /// сторінки беруться з її меню, тож нова сторінка розділу потрапляє сюди сама.
+    /// </summary>
+    private static IEnumerable<(string Name, Func<object> Create)> Targets(AppServices services, IReadOnlyList<User> demoUsers)
     {
-        yield return ("MainWindow", () => services.Windows.CreateMainWindow());
+        yield return ("LoginWindow", () => services.Windows.CreateLoginWindow());
 
         yield return ("MessageDialog: інформація", () => new MessageDialog(
             new MessageDialogViewModel(MessageKind.Info, "Заголовок", "Текст повідомлення", "Зрозуміло")));
@@ -31,10 +34,23 @@ public static class SmokeRunner
         yield return ("MessageDialog: підтвердження", () => new MessageDialog(
             new MessageDialogViewModel(MessageKind.Confirm, "Заголовок", "Текст повідомлення", "Так", "Ні")));
 
-        foreach (var section in Enum.GetValues<AppSection>())
+        foreach (var user in demoUsers)
         {
-            yield return ($"Сторінка розділу {section}", () => CreatePage(services, section));
+            yield return ($"{user.RoleDisplayName}: MainWindow", () => AsUser(services, user, () => services.Windows.CreateMainWindow()));
+
+            // «Користувачі» відкриває діалог, а не сторінку.
+            foreach (var section in user.Sections.Where(section => section != AppSection.Users))
+            {
+                yield return ($"{user.RoleDisplayName}: сторінка {section}", () => AsUser(services, user, () => CreatePage(services, section)));
+            }
         }
+    }
+
+    /// <summary>Входить користувачем напряму, без форми входу, і створює вікно чи сторінку від його імені.</summary>
+    private static object AsUser(AppServices services, User user, Func<object> create)
+    {
+        services.Session.SignIn(user);
+        return create();
     }
 
     /// <summary>Виконує перевірку, пише лог у %TEMP%/brewlog-smoke.log і завершує процес.</summary>
@@ -74,10 +90,10 @@ public static class SmokeRunner
             var services = new AppServices(databasePath, pooling: false);
             services.InitializeDatabase();
             log.WriteLine($"OK: БД ініціалізовано ({databasePath})");
-            SignInDemoUsers(services, log);
+            var demoUsers = SignInDemoUsers(services, log);
             LogDemoRecipes(services, log);
 
-            var failures = Targets(services).Count(target => !TryCreate(target.Name, target.Create, log));
+            var failures = Targets(services, demoUsers).Count(target => !TryCreate(target.Name, target.Create, log));
             return failures == 0 ? 0 : 1;
         }
         catch (Exception exception)
@@ -93,17 +109,21 @@ public static class SmokeRunner
 
     /// <summary>
     /// Перевіряє вхід кожного демо-користувача (HANDOFF §3.3) і пише його роль та розділи меню.
-    /// Наостанок лишає в сесії пивовара: він бачить рецепти, а оболонка отримує справжнє меню.
+    /// Наостанок лишає в сесії пивовара: лише він бачить рецепти для діагностики нижче.
     /// </summary>
-    private static void SignInDemoUsers(AppServices services, TextWriter log)
+    private static IReadOnlyList<User> SignInDemoUsers(AppServices services, TextWriter log)
     {
         (string Login, string Password)[] demoAccounts = [("owner", "owner123"), ("assistant", "assistant123"), ("brewer", "brewer123")];
+        var users = new List<User>();
         foreach (var (login, password) in demoAccounts)
         {
             var user = services.Auth.Login(login, password);
             services.Session.SignIn(user);
+            users.Add(user);
             log.WriteLine($"OK: вхід «{login}» — {user.RoleDisplayName}, розділи: {string.Join(", ", user.Sections)}");
         }
+
+        return users;
     }
 
     /// <summary>Діагностика: показники кожного демо-рецепта й відповідність його стилю.</summary>

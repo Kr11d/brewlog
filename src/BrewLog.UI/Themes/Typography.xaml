@@ -71,6 +71,16 @@
         <Setter Property="Foreground" Value="{StaticResource Text.OnAccent.Muted}" />
     </Style>
 
+    <!-- Повідомлення про помилку під формою; порожній текст не займає місця. -->
+    <Style x:Key="ErrorText" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Foreground" Value="{StaticResource Danger}" />
+        <Style.Triggers>
+            <Trigger Property="Text" Value="">
+                <Setter Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="BigNumber" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource Font.Display}" />
         <Setter Property="FontSize" Value="{StaticResource FontSize.BigNumber}" />

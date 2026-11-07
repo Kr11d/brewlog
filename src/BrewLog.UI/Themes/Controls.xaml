@@ -8,14 +8,14 @@
       Як користуватися темою.
       Стилі, які підключаються явно:
         ContentControl: Card, DocCard, Chip (+ .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
-                        IconBadge, IconBadge.Large, Avatar, LogoMark
+                        IconBadge, IconBadge.Large, Avatar, LogoMark, LogoMark.Large
         Button:         PrimaryButton, SecondaryButton, TextButton, IconButton, ListRowCard, MenuButton
         TextBox:        InputBox, InputArea (плейсхолдер у Tag)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
         ComboBox:       InputCombo (плейсхолдер у Tag)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
         Border:         Divider
-        Window:         BrewWindow, MessageWindow
+        Window:         BrewWindow, LoginWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
       Таблиця — CleanDataGrid у DataGrid.xaml; стилі тексту — у Typography.xaml.
     -->
@@ -27,6 +27,8 @@
     <sys:Double x:Key="Size.Control">48</sys:Double>
     <sys:Double x:Key="Size.ControlSmall">40</sys:Double>
     <GridLength x:Key="Width.Menu">260</GridLength>
+    <sys:Double x:Key="Width.LoginCard">420</sys:Double>
+    <sys:Double x:Key="Size.LogoLarge">64</sys:Double>
 
     <CornerRadius x:Key="Radius.Card">24</CornerRadius>
     <CornerRadius x:Key="Radius.Pill">24</CornerRadius>
@@ -40,6 +42,7 @@
     <Thickness x:Key="Pad.Shell">16</Thickness>
     <Thickness x:Key="Pad.Content">32,16,16,16</Thickness>
     <Thickness x:Key="Pad.Card">24</Thickness>
+    <Thickness x:Key="Pad.CardLarge">32</Thickness>
     <Thickness x:Key="Pad.Menu">16</Thickness>
     <Thickness x:Key="Pad.DialogShadow">24</Thickness>
     <Thickness x:Key="Pad.Button">28,0</Thickness>
@@ -51,6 +54,7 @@
     <Thickness x:Key="Gap.Top.8">0,8,0,0</Thickness>
     <Thickness x:Key="Gap.Top.16">0,16,0,0</Thickness>
     <Thickness x:Key="Gap.Top.24">0,24,0,0</Thickness>
+    <Thickness x:Key="Gap.Top.32">0,32,0,0</Thickness>
     <Thickness x:Key="Gap.Bottom.8">0,0,0,8</Thickness>
     <Thickness x:Key="Gap.Bottom.16">0,0,0,16</Thickness>
     <Thickness x:Key="Gap.Bottom.24">0,0,0,24</Thickness>
@@ -110,6 +114,15 @@
         <Setter Property="UseLayoutRounding" Value="True" />
         <Setter Property="controls:WindowCaption.Background" Value="{StaticResource Bg.GradientStart.Color}" />
         <Setter Property="controls:WindowCaption.Foreground" Value="{StaticResource Text.Primary.Color}" />
+    </Style>
+
+    <!-- Вікно входу: компактне, без зміни розміру; картка входу стоїть по центру градієнта. -->
+    <Style x:Key="LoginWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
+        <Setter Property="Width" Value="560" />
+        <Setter Property="Height" Value="760" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="ResizeMode" Value="CanMinimize" />
     </Style>
 
     <!-- Вікно-картка без заголовка; прозорий край лишає місце для тіні. -->
@@ -1100,17 +1113,18 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- Розмір значка келиха задає Padding: так одна розмітка служить і меню, і вікну входу. -->
     <Style x:Key="LogoMark" TargetType="ContentControl">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Width" Value="{StaticResource Size.ControlSmall}" />
         <Setter Property="Height" Value="{StaticResource Size.ControlSmall}" />
+        <Setter Property="Padding" Value="8" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContentControl">
                     <Border Background="{StaticResource DocCard.Gradient}" CornerRadius="{StaticResource Radius.Input}">
-                        <Path Width="24"
-                              Height="24"
+                        <Path Margin="{TemplateBinding Padding}"
                               Data="{StaticResource Geometry.Mug}"
                               Stretch="Uniform"
                               Stroke="{StaticResource Text.OnAccent}"
@@ -1122,6 +1136,12 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="LogoMark.Large" TargetType="ContentControl" BasedOn="{StaticResource LogoMark}">
+        <Setter Property="Width" Value="{StaticResource Size.LogoLarge}" />
+        <Setter Property="Height" Value="{StaticResource Size.LogoLarge}" />
+        <Setter Property="Padding" Value="14" />
     </Style>
 
     <!-- Тонка смуга прокрутки для всіх ScrollViewer -->

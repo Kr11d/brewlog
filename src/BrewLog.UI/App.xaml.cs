@@ -27,9 +27,20 @@ public partial class App : Application
 
         RegisterExceptionHandlers();
 
+        // Застосунок завершується, коли закрито останнє вікно. Вхід і головне вікно змінюють одне одного
+        // в порядку «показати нове → закрити старе», тож під час переходу вікно є завжди.
+        ShutdownMode = ShutdownMode.OnLastWindowClose;
+
         var services = new AppServices(AppPaths.DefaultDatabasePath);
         services.InitializeDatabase();
-        services.Windows.ShowMainWindow();
+        if (services.TryRestoreSession())
+        {
+            services.Windows.ShowMainWindow();
+        }
+        else
+        {
+            services.Windows.ShowLoginWindow();
+        }
     }
 
     private static void ApplyUkrainianCulture()
