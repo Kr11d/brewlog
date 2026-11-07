@@ -9,15 +9,17 @@
       Стилі, які підключаються явно:
         ContentControl: Card, DocCard, Chip (+ .Accent .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
                         IconBadge, IconBadge.Large, Avatar, LogoMark, LogoMark.Large
-        Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, ListRowCard, ListRowCard.Selectable, MenuButton
-        TextBox:        InputBox, InputArea (плейсхолдер у Tag)
+        Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, IconButton.Cell, ListRowCard, ListRowCard.Selectable, MenuButton, PickerOption
+        TextBox:        InputBox, InputArea (плейсхолдер у Tag);
+                        NumberBox, NumberBox.Cell (DataContext — NumberField: текст прив'язаний сам, неправильне число дає червону рамку)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
-        ComboBox:       InputCombo (плейсхолдер у Tag)
+        ComboBox:       InputCombo, InputCombo.Cell (плейсхолдер у Tag)
         CheckBox:       ToggleSwitch (перемикач «увімкнено / вимкнено»)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
         Border:         Divider
         Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush)
-        Window:         BrewWindow, LoginWindow, DialogWindow, MessageWindow
+        StyleRangeBar:  StyleRangeBar (контекст даних має IsWithin)
+        Window:         BrewWindow, LoginWindow, DialogWindow, EditorWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
       Таблиця — CleanDataGrid у DataGrid.xaml; стилі тексту — у Typography.xaml.
     -->
@@ -34,6 +36,12 @@
     <GridLength x:Key="Width.ListPane">380</GridLength>
     <GridLength x:Key="Width.PreviewPane">360</GridLength>
     <GridLength x:Key="Width.Filter">300</GridLength>
+    <GridLength x:Key="Width.EditorParams">260</GridLength>
+    <GridLength x:Key="Width.EditorStats">300</GridLength>
+    <sys:Double x:Key="Width.Picker">320</sys:Double>
+    <sys:Double x:Key="Height.PickerList">260</sys:Double>
+    <sys:Double x:Key="Size.ControlCell">36</sys:Double>
+    <sys:Double x:Key="Size.RangeBar">12</sys:Double>
     <sys:Double x:Key="Opacity.Muted">0.55</sys:Double>
     <sys:Double x:Key="Size.LogoLarge">64</sys:Double>
 
@@ -56,6 +64,10 @@
     <Thickness x:Key="Pad.Button">28,0</Thickness>
     <Thickness x:Key="Pad.ButtonSmall">16,0</Thickness>
     <Thickness x:Key="Pad.Input">14,0</Thickness>
+    <Thickness x:Key="Pad.InputCell">8,0</Thickness>
+    <Thickness x:Key="Pad.Picker">12</Thickness>
+    <Thickness x:Key="Pad.PickerOption">12,8</Thickness>
+    <Thickness x:Key="Pad.PopupShadow">16,4,16,28</Thickness>
     <Thickness x:Key="Stroke.Input">2</Thickness>
 
     <Thickness x:Key="Gap.Top.4">0,4,0,0</Thickness>
@@ -143,6 +155,13 @@
         <Setter Property="Width" Value="1040" />
         <Setter Property="Height" Value="720" />
         <Setter Property="MinWidth" Value="880" />
+        <Setter Property="MinHeight" Value="600" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+    </Style>
+
+    <!-- Велике модальне вікно на кілька колонок, наприклад редактор рецепта. Колонки прокручуються окремо, тому мінімальна висота менша. -->
+    <Style x:Key="EditorWindow" TargetType="Window" BasedOn="{StaticResource BrewWindow}">
+        <Setter Property="WindowState" Value="Maximized" />
         <Setter Property="MinHeight" Value="600" />
         <Setter Property="ShowInTaskbar" Value="False" />
     </Style>
@@ -333,6 +352,40 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Менша кругла кнопка для рядка таблиці -->
+    <Style x:Key="IconButton.Cell" TargetType="Button" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Width" Value="{StaticResource Size.ControlCell}" />
+        <Setter Property="Height" Value="{StaticResource Size.ControlCell}" />
+    </Style>
+
+    <!-- Пункт списку у спливному виборі: виглядає як пункт InputCombo, але є звичайною кнопкою -->
+    <Style x:Key="PickerOption" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource Text.Primary}" />
+        <Setter Property="Padding" Value="{StaticResource Pad.PickerOption}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="{StaticResource Radius.Item}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Пункт бічного меню. Контекст даних має властивість IsActive. -->
     <Style x:Key="MenuButton" TargetType="Button" BasedOn="{StaticResource PillButton}">
         <Setter Property="Padding" Value="{StaticResource Pad.ButtonSmall}" />
@@ -485,6 +538,24 @@
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
     </Style>
 
+    <!-- Числове поле: контекст даних — NumberField. Текст прив'язаний тут, щоб не повторювати це в кожному полі форми. -->
+    <Style x:Key="NumberBox" TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+        <Setter Property="Text" Value="{Binding Text, UpdateSourceTrigger=PropertyChanged}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsValid}" Value="False">
+                <Setter Property="BorderBrush" Value="{StaticResource Danger}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Те саме поле для рядка таблиці: нижче й щільніше, число праворуч. -->
+    <Style x:Key="NumberBox.Cell" TargetType="TextBox" BasedOn="{StaticResource NumberBox}">
+        <Setter Property="Height" Value="{StaticResource Size.ControlCell}" />
+        <Setter Property="Padding" Value="{StaticResource Pad.InputCell}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+
     <Style x:Key="InputPassword" TargetType="PasswordBox" BasedOn="{StaticResource InputBase}">
         <Setter Property="CaretBrush" Value="{StaticResource Text.Primary}" />
         <Setter Property="SelectionBrush" Value="{StaticResource Accent}" />
@@ -625,7 +696,8 @@
                                               VerticalAlignment="Center"
                                               Content="{TemplateBinding SelectionBoxItem}"
                                               ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
-                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
                             <TextBlock x:Name="Placeholder"
                                        Margin="4,0,28,0"
                                        VerticalAlignment="Center"
@@ -674,6 +746,13 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Те саме поле для рядка таблиці: нижче й щільніше. -->
+    <Style x:Key="InputCombo.Cell" TargetType="ComboBox" BasedOn="{StaticResource InputCombo}">
+        <Setter Property="Height" Value="{StaticResource Size.ControlCell}" />
+        <Setter Property="Padding" Value="{StaticResource Pad.InputCell}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
     </Style>
 
     <!-- Календар і поле дати -->
@@ -1074,6 +1153,19 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Шкала відповідності стилю: у межах — Success, поза ними — Danger. Контекст даних має властивість IsWithin. -->
+    <Style x:Key="StyleRangeBar" TargetType="controls:StyleRangeBar">
+        <Setter Property="Height" Value="{StaticResource Size.RangeBar}" />
+        <Setter Property="TrackBrush" Value="{StaticResource Success.Soft}" />
+        <Setter Property="MarkerBrush" Value="{StaticResource Success}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsWithin}" Value="False">
+                <Setter Property="TrackBrush" Value="{StaticResource Danger.Soft}" />
+                <Setter Property="MarkerBrush" Value="{StaticResource Danger}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Сегменти: RadioButton-и всередині спільної підкладки, наприклад «Дошка / Список» -->

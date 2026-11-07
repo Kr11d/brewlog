@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Common;
+using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.Users;
 
 namespace BrewLog.UI;
@@ -45,6 +46,13 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: сторінка {section}", () => AsUser(services, user, () => CreatePage(services, section)));
             }
 
+            if (user.Can(Permission.EditRecipes))
+            {
+                yield return ($"{user.RoleDisplayName}: RecipeEditorWindow, новий рецепт", () => AsUser(services, user, () => services.Windows.CreateRecipeEditor(null)));
+                yield return ($"{user.RoleDisplayName}: RecipeEditorWindow, редагування", () => AsUser(services, user, () => services.Windows.CreateRecipeEditor(services.Recipes.GetAll()[0].Id)));
+                yield return ($"{user.RoleDisplayName}: CatalogPicker", () => AsUser(services, user, () => CreateCatalogPicker(services)));
+            }
+
             if (user.Can(Permission.ManageUsers))
             {
                 yield return ($"{user.RoleDisplayName}: UsersDialog", () => AsUser(services, user, () => services.Windows.CreateUsersDialog()));
@@ -61,6 +69,12 @@ public static class SmokeRunner
         ((UsersViewModel)dialog.DataContext).NewUserCommand.Execute(null);
         return dialog;
     }
+
+    /// <summary>Вміст спливного вибору окремо: закритий поп-ап не компонується разом із вікном, тому шаблон списку інакше лишився б без перевірки.</summary>
+    private static CatalogPicker CreateCatalogPicker(AppServices services) => new()
+    {
+        DataContext = new RecipeEditorViewModel(services.Recipes, services.Catalog, services.Dialogs, null).Malts,
+    };
 
     /// <summary>Входить користувачем напряму, без форми входу, і створює вікно чи сторінку від його імені.</summary>
     private static object AsUser(AppServices services, User user, Func<object> create)

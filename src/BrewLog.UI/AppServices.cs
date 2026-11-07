@@ -1,3 +1,4 @@
+using BrewLog.Data.BeerXml;
 using BrewLog.Data.Infrastructure;
 using BrewLog.Data.Repositories;
 using BrewLog.Data.Security;
@@ -32,7 +33,7 @@ public sealed class AppServices
         Auth = new AuthService(users, PasswordHasher);
         Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
-        Recipes = new RecipeService(recipes, catalog, Session, Clock);
+        Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());

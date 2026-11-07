@@ -1,3 +1,4 @@
+using BrewLog.Data.BeerXml;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Services;
@@ -7,12 +8,13 @@ using static BrewLog.Tests.Recipes.SampleIngredients;
 
 namespace BrewLog.Tests.Services;
 
-public sealed class RecipeServiceTests
+public sealed class RecipeServiceTests : IDisposable
 {
     private static readonly DateTime Now = new(2026, 3, 15, 10, 30, 0);
 
     private readonly FakeRecipeRepository _recipes = new();
     private readonly FakeCatalogRepository _catalog = new();
+    private readonly string _tempFile = Path.Combine(Path.GetTempPath(), $"brewlog-test-{Guid.NewGuid():N}.xml");
 
     [Theory]
     [InlineData(false, 23.0)]
@@ -91,6 +93,89 @@ public sealed class RecipeServiceTests
         Assert.Equal(13m, cost);
     }
 
+    [Fact]
+    public void Import_MissingAndExistingIngredients_AddsOnlyMissingToCatalog()
+    {
+        var pilsner = Pilsner();
+        pilsner.Amount = 0;
+        _catalog.Insert(pilsner);
+        File.WriteAllText(_tempFile, """
+            <RECIPES>
+              <RECIPE>
+                <NAME>Перший</NAME><BATCH_SIZE>20</BATCH_SIZE>
+                <FERMENTABLES>
+                  <FERMENTABLE><NAME>PILSNER</NAME><TYPE>Grain</TYPE><AMOUNT>5</AMOUNT><YIELD>80</YIELD><COLOR>2</COLOR></FERMENTABLE>
+                </FERMENTABLES>
+                <HOPS>
+                  <HOP><NAME>Nelson</NAME><AMOUNT>0.03</AMOUNT><ALPHA>12</ALPHA><TIME>60</TIME><USE>Boil</USE></HOP>
+                </HOPS>
+              </RECIPE>
+              <RECIPE>
+                <NAME>Другий</NAME><BATCH_SIZE>20</BATCH_SIZE>
+                <HOPS>
+                  <HOP><NAME>nelson</NAME><AMOUNT>0.01</AMOUNT><ALPHA>11</ALPHA><TIME>5</TIME><USE>Boil</USE></HOP>
+                </HOPS>
+              </RECIPE>
+            </RECIPES>
+            """);
+
+        var result = ServiceWith(Permission.EditRecipes).Import(_tempFile);
+
+        Assert.Equal(1, result.NewCatalogItems);
+        Assert.Equal(2, result.RecipeIds.Count);
+        var nelson = _catalog.FindByName(IngredientKind.Hop, "Nelson")!;
+        Assert.Equal(0, nelson.Amount);
+        Assert.Equal(2, _catalog.GetAll().Count);
+        var first = _recipes.GetById(result.RecipeIds[0])!;
+        Assert.Equal(pilsner.Id, first.IngredientsOf<Malt>()[0].CatalogId);
+        Assert.Equal("Pilsner", first.IngredientsOf<Malt>()[0].Name);
+        Assert.Equal(nelson.Id, first.IngredientsOf<Hop>()[0].CatalogId);
+        Assert.Equal(nelson.Id, _recipes.GetById(result.RecipeIds[1])!.IngredientsOf<Hop>()[0].CatalogId);
+    }
+
+    /// <summary>Другий рецепт файлу некоректний: перший теж не зберігається, а нова позиція не потрапляє в довідник.</summary>
+    [Theory]
+    [InlineData(false, 20.0)]
+    [InlineData(true, 0.0)]
+    public void Import_NoPermissionOrInvalidRecipe_ThrowsAndStoresNothing(bool canEdit, double secondVolumeL)
+    {
+        var service = canEdit ? ServiceWith(Permission.EditRecipes) : ServiceWith(Permission.ViewRecipes);
+        File.WriteAllText(_tempFile, $"""
+            <RECIPES>
+              <RECIPE>
+                <NAME>Перший</NAME><BATCH_SIZE>20</BATCH_SIZE>
+                <HOPS>
+                  <HOP><NAME>Nelson</NAME><AMOUNT>0.03</AMOUNT><ALPHA>12</ALPHA><TIME>60</TIME><USE>Boil</USE></HOP>
+                </HOPS>
+              </RECIPE>
+              <RECIPE><NAME>Другий</NAME><BATCH_SIZE>{secondVolumeL}</BATCH_SIZE></RECIPE>
+            </RECIPES>
+            """);
+
+        Assert.Throws<DomainException>(() => service.Import(_tempFile));
+
+        Assert.Empty(_recipes.GetAll());
+        Assert.Empty(_catalog.GetAll());
+    }
+
+    [Fact]
+    public void Export_ExistingRecipe_WritesFileThatImportsBack()
+    {
+        var recipe = RecipeOf(23, Pilsner());
+        _recipes.Insert(recipe);
+        var service = ServiceWith(Permission.EditRecipes);
+
+        service.Export([recipe.Id], _tempFile);
+        var result = service.Import(_tempFile);
+
+        var imported = _recipes.GetById(result.RecipeIds[0])!;
+        Assert.NotEqual(recipe.Id, imported.Id);
+        Assert.Equal(recipe.Name, imported.Name);
+        Assert.Equal(5, imported.IngredientsOf<Malt>()[0].Amount, 0.0001);
+    }
+
+    public void Dispose() => File.Delete(_tempFile);
+
     private RecipeService ServiceWith(params Permission[] permissions) =>
-        new(_recipes, _catalog, new FakeSession(null, permissions), new FixedClock(Now));
+        new(_recipes, _catalog, new BeerXmlSerializer(new FakeStyleRepository()), new FakeSession(null, permissions), new FixedClock(Now));
 }

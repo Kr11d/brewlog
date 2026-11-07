@@ -1,6 +1,8 @@
 using System.Windows;
+using BrewLog.Domain.Common;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Login;
+using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.Users;
 using BrewLog.UI.Shell;
 
@@ -8,7 +10,7 @@ namespace BrewLog.UI.Services;
 
 /// <summary>
 /// Єдине місце, звідки відкриваються окремі вікна. ViewModel вікна збирається тут із сервісів AppServices.
-/// Кожен розробник додає сюди методи своїх вікон: ShowRecipeEditor(int? id), ShowBatchCard(int id), ShowBottling(int id) тощо.
+/// Кожен розробник додає сюди методи своїх вікон, наприклад ShowBatchCard(int id), ShowBottling(int id).
 /// Модальні вікна показуйте через ModalWindow.Show.
 /// </summary>
 public sealed class WindowService
@@ -54,11 +56,26 @@ public sealed class WindowService
         mainWindow?.Close();
     }
 
-    /// <summary>Редактор рецепта: id = null — новий рецепт; true — рецепт збережено. Вікно з'явиться в B9.</summary>
-    public bool ShowRecipeEditor(int? id)
+    /// <summary>
+    /// Редактор рецепта: id = null — новий рецепт. true — рецепт збережено, а savedId — його ідентифікатор:
+    /// лише так сторінка може вибрати щойно створений рецепт.
+    /// </summary>
+    /// <exception cref="DomainException">Рецепта вже немає.</exception>
+    public bool ShowRecipeEditor(int? id, out int savedId)
     {
-        _services.Dialogs.ShowInfo("Буде в B9", id is null ? "Новий рецепт" : "Редагування рецепта");
-        return false;
+        var window = CreateRecipeEditor(id);
+        var isSaved = ModalWindow.Show(window) == true;
+        savedId = window.SavedId;
+        return isSaved;
+    }
+
+    /// <summary>Окремо від показу: smoke-перевірка створює вікно, не показуючи його.</summary>
+    public RecipeEditorWindow CreateRecipeEditor(int? id)
+    {
+        var recipe = id is { } existing
+            ? _services.Recipes.Get(existing) ?? throw new DomainException("Рецепт не знайдено.")
+            : null;
+        return new RecipeEditorWindow(new RecipeEditorViewModel(_services.Recipes, _services.Catalog, _services.Dialogs, recipe));
     }
 
     public void ShowUsers() => ModalWindow.Show(CreateUsersDialog());
