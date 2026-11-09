@@ -29,6 +29,7 @@ public sealed class DemoBatchesTests : IDisposable
             new StockRepository(_database.Connections, new FixedClock(Noon)),
             new IngredientCatalogRepository(_database.Connections),
             recipes,
+            _batches,
             new FakeSession(null, Permission.ViewStock),
             new FixedClock(Noon));
 

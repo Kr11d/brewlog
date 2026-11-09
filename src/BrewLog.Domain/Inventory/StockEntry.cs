@@ -29,4 +29,8 @@ public sealed class StockEntry<T> where T : Ingredient
     public double Available(DateTime now) => Lots.Where(lot => !lot.IsExpired(now)).Sum(lot => lot.QuantityLeft);
 
     public bool IsBelowMinimum(DateTime now) => Available(now) + StockLot.QuantityTolerance < MinStock;
+
+    /// <summary>Знімок позиції без параметра типу: так склади всіх типів можна показати в одній таблиці.</summary>
+    public StockPosition ToPosition(DateTime now) =>
+        new(Item, MinStock, Available(now), NearestExpiry, AverageUnitPrice, IsBelowMinimum(now), Lots, now);
 }

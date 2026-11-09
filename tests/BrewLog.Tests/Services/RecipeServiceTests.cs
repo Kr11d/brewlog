@@ -180,7 +180,7 @@ public sealed class RecipeServiceTests : IDisposable
     {
         var session = new FakeSession(null, permissions);
         var clock = new FixedClock(Now);
-        var inventory = new InventoryService(new FakeStockRepository(), _catalog, _recipes, session, clock);
+        var inventory = new InventoryService(new FakeStockRepository(), _catalog, _recipes, new FakeBatchRepository(), session, clock);
         return new RecipeService(_recipes, _catalog, new BeerXmlSerializer(new FakeStyleRepository()), session, clock, inventory);
     }
 }

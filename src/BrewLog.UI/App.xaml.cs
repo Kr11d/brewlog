@@ -19,6 +19,9 @@ public partial class App : Application
         ApplyUkrainianCulture();
         QuestPDF.Settings.License = LicenseType.Community;
 
+        // З версії 2026.9 QuestPDF не бачить системних шрифтів і зупиняє генерацію без Segoe UI, а поставляти цей шрифт із застосунком не можна.
+        QuestPDF.Settings.UseSystemFonts = true;
+
         if (e.Args.Contains(SmokeRunner.Argument))
         {
             SmokeRunner.Run(this);

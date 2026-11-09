@@ -45,6 +45,9 @@ public sealed class Inventory
     /// <summary>Придатний залишок позиції будь-якого типу; невідома позиція має 0.</summary>
     public double Available(int catalogId, DateTime now) => StockOf(catalogId)?.AvailableOf(catalogId, now) ?? 0;
 
+    /// <summary>Усі позиції складу незалежно від типу.</summary>
+    public IReadOnlyList<StockPosition> Positions(DateTime now) => _stocks.SelectMany(stock => stock.Positions(now)).ToList();
+
     /// <summary>Порівнює потребу рецепта з придатними залишками й називає все, чого бракує.</summary>
     public StockCheckResult Check(Recipe recipe, double volumeL, DateTime now)
     {

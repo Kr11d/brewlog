@@ -70,6 +70,7 @@ public static class SmokeRunner
             if (user.Can(Permission.ManageStock))
             {
                 yield return ($"{user.RoleDisplayName}: StockReceiptDialog", () => AsUser(services, user, () => services.Windows.CreateStockReceiptDialog()));
+                yield return ($"{user.RoleDisplayName}: PurchaseOrderDialog", () => AsUser(services, user, () => services.Windows.CreatePurchaseOrderDialog()));
             }
 
             if (user.Can(Permission.EditRecipes))

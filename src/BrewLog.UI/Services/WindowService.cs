@@ -1,5 +1,6 @@
 using System.Windows;
 using BrewLog.Domain.Common;
+using BrewLog.Domain.Inventory;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.BatchCard;
 using BrewLog.UI.Features.Batches;
@@ -125,6 +126,15 @@ public sealed class WindowService
 
     public StockReceiptDialog CreateStockReceiptDialog() =>
         new(new StockReceiptViewModel(_services.Inventory, _services.Clock, _services.Dialogs));
+
+    /// <summary>Діалог замовлення постачальнику; null — користувач передумав.</summary>
+    public PurchaseOrder? ShowPurchaseOrder()
+    {
+        var dialog = CreatePurchaseOrderDialog();
+        return ModalWindow.Show(dialog) == true ? dialog.Order : null;
+    }
+
+    public PurchaseOrderDialog CreatePurchaseOrderDialog() => new(new PurchaseOrderViewModel(_services.Inventory, _services.Dialogs));
 
     private static void ShowAsMain(Window window)
     {

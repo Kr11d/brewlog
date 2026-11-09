@@ -14,6 +14,8 @@ public sealed class Adjunct : Ingredient
 
     public override string Unit => "кг";
 
+    public override string KindDisplayName => "Додатки";
+
     /// <summary>Додає екстракт: цукор розчиняється повністю, тому ефективність затирання не діє.</summary>
     public override void ApplyTo(RecipeStats stats) => stats.AddExtract(this, YieldPercent, usesEfficiency: false);
 

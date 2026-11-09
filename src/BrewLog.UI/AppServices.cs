@@ -1,4 +1,5 @@
 using BrewLog.Data.BeerXml;
+using BrewLog.Data.Export;
 using BrewLog.Data.Infrastructure;
 using BrewLog.Data.Repositories;
 using BrewLog.Data.Security;
@@ -36,9 +37,10 @@ public sealed class AppServices
         Auth = new AuthService(users, PasswordHasher);
         Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
-        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, Session, Clock);
+        var batches = new BatchRepository(Connections);
+        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, batches, Session, Clock);
         Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock, Inventory);
-        Batches = new BatchService(new BatchRepository(Connections), recipes, styles, Recipes, Inventory, Session, Clock);
+        Batches = new BatchService(batches, recipes, styles, Recipes, Inventory, Session, Clock);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
@@ -111,6 +113,6 @@ public sealed class AppServices
         [AppSection.Batches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: false),
         [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
         [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
-        [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows),
+        [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows, new PurchaseOrderPdf(), new StockExcelExporter()),
     };
 }

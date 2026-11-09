@@ -1,3 +1,5 @@
+using System.IO;
+using BrewLog.Data.Export;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Inventory;
@@ -24,6 +26,8 @@ public sealed partial class InventoryViewModel : ObservableObject
     private readonly IClock _clock;
     private readonly DialogService _dialogs;
     private readonly WindowService _windows;
+    private readonly PurchaseOrderPdf _orderPdf;
+    private readonly StockExcelExporter _stockExcel;
 
     private List<InventoryRowViewModel> _allRows = [];
     private IngredientKind? _kindFilter;
@@ -81,8 +85,12 @@ public sealed partial class InventoryViewModel : ObservableObject
         ICurrentSession session,
         IClock clock,
         DialogService dialogs,
-        WindowService windows)
+        WindowService windows,
+        PurchaseOrderPdf orderPdf,
+        StockExcelExporter stockExcel)
     {
+        _orderPdf = orderPdf;
+        _stockExcel = stockExcel;
         _inventory = inventory;
         _batches = batches;
         _catalog = catalog;
@@ -142,11 +150,51 @@ public sealed partial class InventoryViewModel : ObservableObject
         }
     }
 
+    /// <summary>Формує замовлення, питає, куди зберегти, і відкриває PDF. Команда вимикає кнопку на час роботи.</summary>
     [RelayCommand]
-    private void CreateOrder() => _dialogs.ShowInfo("Буде в A8");
+    private async Task CreateOrderAsync()
+    {
+        if (!CanManageStock || _windows.ShowPurchaseOrder() is not { } order)
+        {
+            return;
+        }
 
+        var path = _dialogs.PickFileToSave("PDF (*.pdf)|*.pdf", "Замовлення постачальнику", $"{order.Number}.pdf");
+        if (path is not null)
+        {
+            await SaveAndOpenAsync(() => _orderPdf.Save(order, path), path);
+        }
+    }
+
+    /// <summary>Дані читає тут, а файл пише у фоні: сесія й сервіси лишаються в потоці інтерфейсу.</summary>
     [RelayCommand]
-    private void ExportExcel() => _dialogs.ShowInfo("Буде в A8");
+    private async Task ExportExcelAsync()
+    {
+        var now = _clock.Now;
+        var path = _dialogs.PickFileToSave("Excel (*.xlsx)|*.xlsx", "Експорт складу", $"Склад-{DisplayFormat.Date(now)}.xlsx");
+        if (path is null)
+        {
+            return;
+        }
+
+        var positions = _inventory.GetInventory(now).Positions(now);
+        var lots = _inventory.GetLots();
+        var suppliers = _inventory.GetSuppliers().ToDictionary(supplier => supplier.Id, supplier => supplier.Name);
+        await SaveAndOpenAsync(() => _stockExcel.Export(positions, lots, suppliers, path), path);
+    }
+
+    private async Task SaveAndOpenAsync(Action save, string path)
+    {
+        try
+        {
+            await Task.Run(save);
+            _dialogs.OpenFile(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            _dialogs.ShowError($"Не вдалося записати файл «{Path.GetFileName(path)}». Перевірте, що він не відкритий в іншій програмі й що є дозвіл на запис.");
+        }
+    }
 
     [RelayCommand]
     private void SaveItem()

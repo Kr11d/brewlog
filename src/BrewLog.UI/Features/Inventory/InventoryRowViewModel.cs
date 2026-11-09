@@ -4,50 +4,38 @@ using BrewLog.UI.Formatting;
 
 namespace BrewLog.UI.Features.Inventory;
 
-/// <summary>Позиція складу для таблиці. Створюється generic-методом, тож один тип рядка обслуговує склади всіх типів інгредієнтів.</summary>
+/// <summary>Позиція складу для таблиці: готові рядки для показу. Вигляд статусу тема вибирає за суфіксом стилю чипа.</summary>
 public sealed class InventoryRowViewModel
 {
-    private const int ExpiringDays = 30;
-
-    private InventoryRowViewModel(
-        Ingredient item,
-        string kindTitle,
-        double available,
-        double minStock,
-        DateTime? nearestExpiry,
-        decimal? averagePrice,
-        bool isBelowMinimum,
-        IReadOnlyList<StockLot> lots,
-        DateTime now,
-        IReadOnlyDictionary<int, string> suppliers)
+    public InventoryRowViewModel(StockPosition position, IReadOnlyDictionary<int, string> suppliers)
     {
+        var item = position.Item;
         CatalogId = item.CatalogId;
         Name = item.Name;
         Kind = item.Kind;
-        KindTitle = kindTitle;
+        KindTitle = item.KindDisplayName;
         Unit = item.Unit;
-        Available = available;
-        AvailableText = DisplayFormat.Amount(available, item.Unit);
-        MinStock = minStock;
-        MinStockText = DisplayFormat.Amount(minStock, item.Unit);
-        NearestExpiry = nearestExpiry;
-        NearestExpiryText = nearestExpiry is { } date ? DisplayFormat.Date(date) : "—";
-        AveragePrice = averagePrice;
-        AveragePriceText = averagePrice is { } price ? DisplayFormat.MoneyValue(price) : "—";
-        IsBelowMinimum = isBelowMinimum;
-        IsExpired = lots.Any(lot => lot.IsExpired(now));
-        IsExpiring = lots.Any(lot => lot.ExpiresWithin(now, ExpiringDays));
-        Value = lots.Sum(lot => (decimal)lot.QuantityLeft * lot.UnitPrice);
-
-        (StatusText, StatusChip) = (IsExpired, IsBelowMinimum, IsExpiring) switch
+        Available = position.Available;
+        AvailableText = DisplayFormat.Amount(position.Available, item.Unit);
+        MinStock = position.MinStock;
+        MinStockText = DisplayFormat.Amount(position.MinStock, item.Unit);
+        NearestExpiry = position.NearestExpiry;
+        NearestExpiryText = position.NearestExpiry is { } date ? DisplayFormat.Date(date) : "—";
+        AveragePrice = position.AverageUnitPrice;
+        AveragePriceText = position.AverageUnitPrice is { } price ? DisplayFormat.MoneyValue(price) : "—";
+        IsBelowMinimum = position.IsBelowMinimum;
+        IsExpired = position.IsExpired;
+        IsExpiring = position.IsExpiring;
+        Value = position.Value;
+        StatusText = position.StatusText;
+        StatusChip = position.Status switch
         {
-            (true, _, _) => ("Прострочено", "Danger"),
-            (_, true, _) => ("Нижче мінімуму", "Danger"),
-            (_, _, true) => ("Спливає", "Warning"),
-            _ => ("Норма", "Success"),
+            StockStatus.Normal => "Success",
+            StockStatus.Expiring => "Warning",
+            _ => "Danger",
         };
 
-        Lots = lots
+        Lots = position.Lots
             .OrderBy(lot => lot.ExpiresAt ?? DateTime.MaxValue)
             .Select(lot => new StockLotRowViewModel(
                 $"Прихід {DisplayFormat.Date(lot.ReceivedAt)}",
@@ -102,11 +90,4 @@ public sealed class InventoryRowViewModel
     public IReadOnlyList<StockLotRowViewModel> Lots { get; }
 
     public bool HasNoLots => Lots.Count == 0;
-
-    public static InventoryRowViewModel From<T>(
-        StockEntry<T> entry,
-        string kindTitle,
-        DateTime now,
-        IReadOnlyDictionary<int, string> suppliers) where T : Ingredient =>
-        new(entry.Item, kindTitle, entry.Available(now), entry.MinStock, entry.NearestExpiry, entry.AverageUnitPrice, entry.IsBelowMinimum(now), entry.Lots, now, suppliers);
 }

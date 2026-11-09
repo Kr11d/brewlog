@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using BrewLog.UI.Features.Common;
 using Microsoft.Win32;
@@ -37,6 +39,19 @@ public sealed class DialogService
             FileName = string.Join("_", suggestedName.Split(Path.GetInvalidFileNameChars())),
         };
         return dialog.ShowDialog() == true ? dialog.FileName : null;
+    }
+
+    /// <summary>Відкриває файл програмою, яка призначена для нього в системі; якщо такої немає, повідомляє, що файл збережено.</summary>
+    public void OpenFile(string path)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception exception) when (exception is Win32Exception or InvalidOperationException)
+        {
+            ShowInfo($"Файл збережено, але відкрити його не вдалося: {path}");
+        }
     }
 
     private static bool Show(MessageDialogViewModel viewModel) =>

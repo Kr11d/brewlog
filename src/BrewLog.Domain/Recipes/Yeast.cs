@@ -18,6 +18,10 @@ public sealed class Yeast : Ingredient
 
     public override string Unit => "пак.";
 
+    public override string KindDisplayName => "Дріжджі";
+
+    public override double PurchaseStep => 1;
+
     /// <summary>Передає зброджування й температури: екстракту, кольору й гіркоти дріжджі не додають.</summary>
     public override void ApplyTo(RecipeStats stats) => stats.AddYeast(AttenuationPercent, TempMinC, TempMaxC);
 

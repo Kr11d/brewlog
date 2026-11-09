@@ -25,6 +25,12 @@ public abstract class Ingredient : IEntity
     /// <summary>Одиниця кількості; ціна на складі теж рахується за неї.</summary>
     public abstract string Unit { get; }
 
+    /// <summary>Назва типу для людини: «Солод», «Хміль», «Дріжджі», «Додатки».</summary>
+    public abstract string KindDisplayName { get; }
+
+    /// <summary>Крок замовлення постачальнику в одиницях складу: кількість округлюється вгору до кратного йому.</summary>
+    public virtual double PurchaseStep => 0.5;
+
     /// <summary>Назва для повідомлень про помилки: рядок без назви теж треба якось позначити.</summary>
     protected string Label => string.IsNullOrWhiteSpace(Name) ? "Інгредієнт" : Name;
 

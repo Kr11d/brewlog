@@ -19,6 +19,10 @@ public sealed class Hop : Ingredient
 
     public override string Unit => "г";
 
+    public override string KindDisplayName => "Хміль";
+
+    public override double PurchaseStep => 50;
+
     /// <summary>Реєструє варильне внесення: IBU рахується в кінці, бо залежить від OG усього рецепта. Сухе охмелення гіркоти не додає.</summary>
     public override void ApplyTo(RecipeStats stats)
     {
