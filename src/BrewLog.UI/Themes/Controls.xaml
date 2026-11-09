@@ -8,7 +8,7 @@
       Як користуватися темою.
       Стилі, які підключаються явно:
         ContentControl: Card, DocCard, Chip (+ .Accent .Row .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
-                        IconBadge, IconBadge.Large, Avatar, Avatar.Row, Avatar.Small, LogoMark, LogoMark.Large
+                        IconBadge, IconBadge.Large, Avatar, Avatar.Row, Avatar.Small, StepBadge, LogoMark, LogoMark.Large
         Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, IconButton.Cell, ListRowCard, ListRowCard.Selectable, BoardCard, MenuButton, PickerOption
         TextBox:        InputBox, InputArea (плейсхолдер у Tag); SearchBox (поле пошуку екрана: Ctrl+F переводить у нього фокус);
                         NumberBox, NumberBox.Cell (DataContext — NumberField: текст прив'язаний сам, неправильне число дає червону рамку)
@@ -16,7 +16,7 @@
         ComboBox:       InputCombo, InputCombo.Cell (плейсхолдер у Tag)
         CheckBox:       ToggleSwitch (перемикач «увімкнено / вимкнено»)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
-        Border:         Divider, BoardColumn (колонка дошки партій)
+        Border:         Divider, BoardColumn (колонка дошки партій), StepLine (лінія шкали етапів)
         Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush), StageDot (крапка етапу; Fill через ResourceByKey)
         StyleRangeBar:  StyleRangeBar (контекст даних має IsWithin)
         Window:         BrewWindow, LoginWindow, DialogWindow (Esc закриває), EditorWindow, MessageWindow
@@ -45,6 +45,10 @@
     <sys:Double x:Key="Width.BoardColumn">244</sys:Double>
     <sys:Double x:Key="Size.StageDot">10</sys:Double>
     <sys:Double x:Key="Size.AvatarSmall">28</sys:Double>
+    <sys:Double x:Key="Size.Step">32</sys:Double>
+    <sys:Double x:Key="Height.Chart">240</sys:Double>
+    <sys:Double x:Key="Height.MeasurementsTable">280</sys:Double>
+    <GridLength x:Key="Width.CardSide">480</GridLength>
     <sys:Double x:Key="Height.PickerList">260</sys:Double>
     <sys:Double x:Key="Size.ControlCell">36</sys:Double>
     <sys:Double x:Key="Size.RangeBar">12</sys:Double>
@@ -1393,6 +1397,48 @@
         <Setter Property="Width" Value="{StaticResource Size.AvatarSmall}" />
         <Setter Property="Height" Value="{StaticResource Size.AvatarSmall}" />
         <Setter Property="FontSize" Value="{StaticResource FontSize.Tiny}" />
+    </Style>
+
+    <!-- Крок шкали етапів: пройдений заповнений, поточний обведений, наступні сірі. Контекст даних має IsPassed та IsCurrent. -->
+    <Style x:Key="StepBadge" TargetType="ContentControl">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Width" Value="{StaticResource Size.Step}" />
+        <Setter Property="Height" Value="{StaticResource Size.Step}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{StaticResource Border}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource Text.Secondary}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <Grid>
+                        <Ellipse Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsPassed}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Accent}" />
+                <Setter Property="Foreground" Value="{StaticResource Text.OnAccent}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface}" />
+                <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+                <Setter Property="Foreground" Value="{StaticResource Accent}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Лінія між кроками шкали етапів. -->
+    <Style x:Key="StepLine" TargetType="Border">
+        <Setter Property="Height" Value="2" />
+        <Setter Property="Background" Value="{StaticResource Border}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <!-- Розмір значка келиха задає Padding: так одна розмітка служить і меню, і вікну входу. -->

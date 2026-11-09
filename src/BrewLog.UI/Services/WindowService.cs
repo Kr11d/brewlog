@@ -1,6 +1,7 @@
 using System.Windows;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.BatchCard;
 using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Login;
 using BrewLog.UI.Features.RecipeEditor;
@@ -95,7 +96,17 @@ public sealed class WindowService
     public ResetPasswordDialog CreateResetPasswordDialog(User user) =>
         new(new ResetPasswordViewModel(_services.Users, _services.Dialogs, user));
 
-    public void ShowBatchCard(int id) => _services.Dialogs.ShowInfo("Буде в A5");
+    /// <exception cref="DomainException">Партії немає або немає доступу до неї.</exception>
+    public void ShowBatchCard(int id) => ModalWindow.Show(CreateBatchCard(id));
+
+    public BatchCardWindow CreateBatchCard(int id) =>
+        new(new BatchCardViewModel(id, _services.Batches, _services.Session, _services.Clock, _services.Dialogs, this));
+
+    /// <summary>Діалог фактичної OG; true — значення збережено.</summary>
+    public bool ShowActualOg(int batchId, double suggestedOg) => ModalWindow.Show(CreateActualOgDialog(batchId, suggestedOg)) == true;
+
+    public ActualOgDialog CreateActualOgDialog(int batchId, double suggestedOg) =>
+        new(new ActualOgViewModel(batchId, suggestedOg, _services.Batches, _services.Dialogs));
 
     /// <summary>Діалог планування партії; true — партію заплановано.</summary>
     public bool ShowNewBatch() => ModalWindow.Show(CreateNewBatchDialog()) == true;

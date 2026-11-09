@@ -3,7 +3,6 @@ using BrewLog.Domain.Batches;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
-using BrewLog.UI.Formatting;
 using BrewLog.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -109,11 +108,21 @@ public sealed partial class BatchesViewModel : ObservableObject
     [RelayCommand]
     private void Open(BatchItemViewModel? item)
     {
-        if (item is not null)
+        if (item is null)
+        {
+            return;
+        }
+
+        try
         {
             _windows.ShowBatchCard(item.Id);
-            Reload();
         }
+        catch (DomainException exception)
+        {
+            _dialogs.ShowError(exception.Message);
+        }
+
+        Reload();
     }
 
     /// <summary>Переводить партію далі: заборону показує з причиною, а запуск варки спершу підтверджує зі списком сировини.</summary>
@@ -134,7 +143,8 @@ public sealed partial class BatchesViewModel : ObservableObject
                 return;
             }
 
-            if (item.RequiresStock && !_dialogs.Confirm(DescribeWriteOff(item), item.NextStageHint, "Запустити варку"))
+            if (item.RequiresStock
+                && !_dialogs.Confirm(WriteOffConfirmation.Describe(item.Number, _batches.PreviewWriteOff(item.Id)), item.NextStageHint, "Запустити варку"))
             {
                 return;
             }
@@ -147,12 +157,6 @@ public sealed partial class BatchesViewModel : ObservableObject
             _dialogs.ShowError(exception.Message);
             Reload();
         }
-    }
-
-    private string DescribeWriteOff(BatchItemViewModel item)
-    {
-        var lines = _batches.PreviewWriteOff(item.Id).Select(line => $"{line.Name}: {DisplayFormat.Amount(line.Quantity, line.Unit)}");
-        return $"Партію {item.Number} буде запущено у варку. Зі складу буде списано:{Environment.NewLine}{string.Join(Environment.NewLine, lines)}";
     }
 
     private void Reload()

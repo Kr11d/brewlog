@@ -33,6 +33,18 @@ public static class DisplayFormat
     /// <summary>Ціле значення, наприклад IBU, SRM чи EBC.</summary>
     public static string Integer(double value) => value.ToString("0", Culture);
 
+    /// <summary>Температура: «20,5 °C».</summary>
+    public static string Temperature(double value) => $"{value.ToString("0.0", Culture)} °C";
+
+    /// <summary>Дата: «09.11.2026».</summary>
+    public static string Date(DateTime value) => value.ToString("dd.MM.yyyy", Culture);
+
+    /// <summary>Короткі дата й час виміру: «09.11 14:30».</summary>
+    public static string DateAndTime(DateTime value) => value.ToString("dd.MM HH:mm", Culture);
+
+    /// <summary>Коротка дата для осі графіка: «09.11».</summary>
+    public static string DayAndMonth(DateTime value) => value.ToString("dd.MM", Culture);
+
     /// <summary>Сума без одиниці: «1 234,50».</summary>
     public static string MoneyValue(decimal value) => value.ToString("#,0.00", Culture);
 
