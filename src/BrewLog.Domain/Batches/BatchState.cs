@@ -25,6 +25,9 @@ public abstract class BatchState
     /// <summary>Чи триває бродіння: лише тоді мають сенс попередження про його хід.</summary>
     public virtual bool TracksFermentation => false;
 
+    /// <summary>Чи потребує вихід з етапу сировини: тоді сервіс перевіряє склад і списує її під час переходу.</summary>
+    public virtual bool RequiresStock => false;
+
     /// <summary>Перевіряє умову виходу з цього етапу (HANDOFF §6.3); причина відмови призначена для користувача.</summary>
     public abstract TransitionCheck CanAdvance(TransitionContext ctx);
 

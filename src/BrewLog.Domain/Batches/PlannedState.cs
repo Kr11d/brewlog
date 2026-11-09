@@ -12,6 +12,8 @@ public sealed class PlannedState : BatchState
 
     public override int Order => 1;
 
+    public override bool RequiresStock => true;
+
     public override TransitionCheck CanAdvance(TransitionContext ctx)
     {
         if (ctx.Stock is null)

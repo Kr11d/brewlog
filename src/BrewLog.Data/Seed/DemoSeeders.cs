@@ -15,5 +15,6 @@ public static class DemoSeeders
         new CatalogSeeder(),
         new RecipeSeeder(),
         new StockSeeder(),
+        new BatchSeeder(),
     ];
 }
