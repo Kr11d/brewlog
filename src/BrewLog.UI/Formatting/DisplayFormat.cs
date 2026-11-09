@@ -33,6 +33,19 @@ public static class DisplayFormat
     /// <summary>Ціле значення, наприклад IBU, SRM чи EBC.</summary>
     public static string Integer(double value) => value.ToString("0", Culture);
 
+    /// <summary>Різниця міцності зі знаком: «+0,2 %», «−0,4 %».</summary>
+    public static string SignedPercent(double value) => $"{value.ToString("+0.0;−0.0;0.0", Culture)} %";
+
+    /// <summary>Місяць із роком: «Листопад 2026».</summary>
+    public static string MonthAndYear(DateTime value)
+    {
+        var text = value.ToString("MMMM yyyy", Culture);
+        return char.ToUpper(text[0], Culture) + text[1..];
+    }
+
+    /// <summary>Скорочена назва місяця для графіка: «лис».</summary>
+    public static string ShortMonth(DateTime value) => value.ToString("MMM", Culture).TrimEnd('.');
+
     /// <summary>Температура: «20,5 °C».</summary>
     public static string Temperature(double value) => $"{value.ToString("0.0", Culture)} °C";
 

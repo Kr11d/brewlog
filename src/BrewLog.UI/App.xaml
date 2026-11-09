@@ -6,7 +6,8 @@
              xmlns:common="clr-namespace:BrewLog.UI.Features.Common"
              xmlns:inventory="clr-namespace:BrewLog.UI.Features.Inventory"
              xmlns:measurements="clr-namespace:BrewLog.UI.Features.Measurements"
-             xmlns:recipes="clr-namespace:BrewLog.UI.Features.Recipes">
+             xmlns:recipes="clr-namespace:BrewLog.UI.Features.Recipes"
+             xmlns:reports="clr-namespace:BrewLog.UI.Features.Reports">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -34,6 +35,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type bottling:BottlingPageViewModel}">
                 <bottling:BottlingPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type reports:ReportsViewModel}">
+                <reports:ReportsPage />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

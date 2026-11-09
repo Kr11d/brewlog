@@ -94,6 +94,10 @@ public sealed class Batch : IEntity
     /// <summary>Фактична міцність, %, за HANDOFF §6.2; відома лише після розливу з кінцевою густиною.</summary>
     public double? ActualAbv => Packaging?.FinalGravity is { } finalGravity ? AbvAt(finalGravity) : null;
 
+    /// <summary>Собівартість літра, грн (HANDOFF §10): вартість сировини / розлитий обсяг; null, доки партію не розлито.</summary>
+    public decimal? CostPerLiter =>
+        IngredientsCost is { } cost && Packaging is { PackagedVolumeL: > 0 } packaging ? cost / (decimal)packaging.PackagedVolumeL : null;
+
     /// <summary>Чи лежить густина в межах, можливих для виміряного сусла чи пива.</summary>
     public static bool IsMeasurableGravity(double gravity) => gravity is >= 0.990 and <= 1.150;
 

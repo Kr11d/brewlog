@@ -12,6 +12,7 @@ using BrewLog.UI.Features.Bottling;
 using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.Measurements;
 using BrewLog.UI.Features.Recipes;
+using BrewLog.UI.Features.Reports;
 using BrewLog.UI.Services;
 
 namespace BrewLog.UI;
@@ -42,6 +43,7 @@ public sealed class AppServices
         Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, batches, Session, Clock);
         Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock, Inventory);
         Batches = new BatchService(batches, recipes, styles, Recipes, Inventory, Session, Clock);
+        Reports = new ReportService(batches, Session);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
@@ -71,6 +73,8 @@ public sealed class AppServices
     public RecipeService Recipes { get; }
 
     public BatchService Batches { get; }
+
+    public ReportService Reports { get; }
 
     public DialogService Dialogs { get; }
 
@@ -115,6 +119,7 @@ public sealed class AppServices
         [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
         [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
         [AppSection.Bottling] = () => new BottlingPageViewModel(Batches, Clock, Dialogs, Windows),
+        [AppSection.Reports] = () => new ReportsViewModel(Reports, Clock, Dialogs),
         [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows, new PurchaseOrderPdf(), new StockExcelExporter()),
     };
 }
