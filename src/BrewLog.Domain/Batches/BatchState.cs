@@ -16,6 +16,9 @@ public abstract class BatchState
     /// <summary>Номер етапу, починаючи з 1: для шкали й сортування.</summary>
     public abstract int Order { get; }
 
+    /// <summary>Чи це останній етап: він сам є своїм наступним.</summary>
+    public bool IsFinal => ReferenceEquals(Next(), this);
+
     public virtual bool AllowsMeasurements => false;
 
     public virtual bool AllowsActualOg => false;

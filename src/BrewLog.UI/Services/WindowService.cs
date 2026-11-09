@@ -1,6 +1,7 @@
 using System.Windows;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Login;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
@@ -93,6 +94,19 @@ public sealed class WindowService
 
     public ResetPasswordDialog CreateResetPasswordDialog(User user) =>
         new(new ResetPasswordViewModel(_services.Users, _services.Dialogs, user));
+
+    public void ShowBatchCard(int id) => _services.Dialogs.ShowInfo("Буде в A5");
+
+    /// <summary>Діалог планування партії; true — партію заплановано.</summary>
+    public bool ShowNewBatch() => ModalWindow.Show(CreateNewBatchDialog()) == true;
+
+    public NewBatchDialog CreateNewBatchDialog() => new(new NewBatchViewModel(
+        _services.Recipes,
+        _services.Batches,
+        _services.Inventory,
+        _services.Users,
+        _services.Clock,
+        _services.Dialogs));
 
     private static void ShowAsMain(Window window)
     {

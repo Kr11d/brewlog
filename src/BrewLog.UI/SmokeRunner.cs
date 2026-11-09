@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Common;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
@@ -47,6 +48,17 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: сторінка {section}", () => AsUser(services, user, () => CreatePage(services, section)));
             }
 
+            // Сторінка партій відкривається дошкою: список перевіряється окремо, бо прихована таблиця не компонується.
+            foreach (var section in user.Sections.Where(section => section is AppSection.Batches or AppSection.MyBatches))
+            {
+                yield return ($"{user.RoleDisplayName}: сторінка {section}, список", () => AsUser(services, user, () => CreateBatchesList(services, section)));
+            }
+
+            if (user.Can(Permission.ManageBatches))
+            {
+                yield return ($"{user.RoleDisplayName}: NewBatchDialog", () => AsUser(services, user, () => services.Windows.CreateNewBatchDialog()));
+            }
+
             if (user.Can(Permission.EditRecipes))
             {
                 yield return ($"{user.RoleDisplayName}: RecipeEditorWindow, новий рецепт", () => AsUser(services, user, () => services.Windows.CreateRecipeEditor(null)));
@@ -71,6 +83,13 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: ResetPasswordDialog", () => AsUser(services, user, () => services.Windows.CreateResetPasswordDialog(user)));
             }
         }
+    }
+
+    private static ContentControl CreateBatchesList(AppServices services, AppSection section)
+    {
+        var page = CreatePage(services, section);
+        ((BatchesViewModel)page.Content).IsBoardView = false;
+        return page;
     }
 
     /// <summary>Діалог «Користувачі» у стані нового запису: так перевіряються поля паролів, приховані для наявного.</summary>

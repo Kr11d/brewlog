@@ -8,16 +8,16 @@
       Як користуватися темою.
       Стилі, які підключаються явно:
         ContentControl: Card, DocCard, Chip (+ .Accent .Row .Planned .Brewing .Fermenting .Conditioning .Packaged .Success .Warning .Danger .Info),
-                        IconBadge, IconBadge.Large, Avatar, Avatar.Row, LogoMark, LogoMark.Large
-        Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, IconButton.Cell, ListRowCard, ListRowCard.Selectable, MenuButton, PickerOption
+                        IconBadge, IconBadge.Large, Avatar, Avatar.Row, Avatar.Small, LogoMark, LogoMark.Large
+        Button:         PrimaryButton, SecondaryButton, SecondaryButton.Compact, TextButton, IconButton, IconButton.Cell, ListRowCard, ListRowCard.Selectable, BoardCard, MenuButton, PickerOption
         TextBox:        InputBox, InputArea (плейсхолдер у Tag); SearchBox (поле пошуку екрана: Ctrl+F переводить у нього фокус);
                         NumberBox, NumberBox.Cell (DataContext — NumberField: текст прив'язаний сам, неправильне число дає червону рамку)
         PasswordBox:    InputPassword (плейсхолдер у Tag)
         ComboBox:       InputCombo, InputCombo.Cell (плейсхолдер у Tag)
         CheckBox:       ToggleSwitch (перемикач «увімкнено / вимкнено»)
         RadioButton:    SegmentedButton усередині Border зі стилем SegmentedGroup
-        Border:         Divider
-        Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush)
+        Border:         Divider, BoardColumn (колонка дошки партій)
+        Ellipse:        Swatch, Swatch.Large (кольорова плашка пива; Fill через SrmToBrush), StageDot (крапка етапу; Fill через ResourceByKey)
         StyleRangeBar:  StyleRangeBar (контекст даних має IsWithin)
         Window:         BrewWindow, LoginWindow, DialogWindow (Esc закриває), EditorWindow, MessageWindow
       Застосовуються самі: CheckBox, RadioButton, DatePicker (плейсхолдер у Tag), ScrollBar, ToolTip, TabControl, TabItem.
@@ -26,6 +26,7 @@
 
     <converters:InitialsConverter x:Key="Initials" />
     <converters:SrmToBrushConverter x:Key="SrmToBrush" />
+    <converters:ResourceByKeyConverter x:Key="ResourceByKey" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!-- Розміри -->
@@ -41,6 +42,9 @@
     <GridLength x:Key="Width.StyleCode">120</GridLength>
     <GridLength x:Key="Width.RangeLabel">72</GridLength>
     <sys:Double x:Key="Width.Picker">320</sys:Double>
+    <sys:Double x:Key="Width.BoardColumn">244</sys:Double>
+    <sys:Double x:Key="Size.StageDot">10</sys:Double>
+    <sys:Double x:Key="Size.AvatarSmall">28</sys:Double>
     <sys:Double x:Key="Height.PickerList">260</sys:Double>
     <sys:Double x:Key="Size.ControlCell">36</sys:Double>
     <sys:Double x:Key="Size.RangeBar">12</sys:Double>
@@ -227,6 +231,22 @@
         <Setter Property="Height" Value="56" />
         <Setter Property="Stroke" Value="{StaticResource Text.OnAccent.Muted}" />
         <Setter Property="StrokeThickness" Value="2" />
+    </Style>
+
+    <!-- Крапка кольору етапу в заголовку колонки дошки. -->
+    <Style x:Key="StageDot" TargetType="Ellipse">
+        <Setter Property="Width" Value="{StaticResource Size.StageDot}" />
+        <Setter Property="Height" Value="{StaticResource Size.StageDot}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Колонка дошки партій: напівпрозора заокруглена панель. -->
+    <Style x:Key="BoardColumn" TargetType="Border">
+        <Setter Property="Width" Value="{StaticResource Width.BoardColumn}" />
+        <Setter Property="Background" Value="{StaticResource Board.Column}" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Card}" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="{StaticResource Gap.Right.8}" />
     </Style>
 
     <Style x:Key="Divider" TargetType="Border">
@@ -466,6 +486,33 @@
             <DataTrigger Binding="{Binding IsMuted}" Value="True">
                 <Setter Property="Opacity" Value="{StaticResource Opacity.Muted}" />
             </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Картка партії на дошці: уся картка клікабельна, а кнопка всередині неї перехоплює власний клік. -->
+    <Style x:Key="BoardCard" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource Surface}" />
+        <Setter Property="Foreground" Value="{StaticResource Text.Primary}" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="{StaticResource Gap.Bottom.8}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing.Box}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource Radius.Row}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
+            </Trigger>
         </Style.Triggers>
     </Style>
 
@@ -1339,6 +1386,13 @@
                 <Setter Property="Background" Value="{StaticResource Surface}" />
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- Ініціали виконавця на картці дошки. -->
+    <Style x:Key="Avatar.Small" TargetType="ContentControl" BasedOn="{StaticResource Avatar}">
+        <Setter Property="Width" Value="{StaticResource Size.AvatarSmall}" />
+        <Setter Property="Height" Value="{StaticResource Size.AvatarSmall}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSize.Tiny}" />
     </Style>
 
     <!-- Розмір значка келиха задає Padding: так одна розмітка служить і меню, і вікну входу. -->

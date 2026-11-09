@@ -1,6 +1,7 @@
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Batches;
 using BrewLog.Domain.Common;
+using BrewLog.Domain.Inventory;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 
@@ -129,6 +130,22 @@ public sealed class BatchService
 
         batch.Advance(context);
         _batches.UpdateState(batch);
+    }
+
+    /// <summary>Що й скільки буде списано під час запуску варки: кількості рецепта в масштабі партії.</summary>
+    public IReadOnlyList<PlannedWriteOff> PreviewWriteOff(int batchId)
+    {
+        _session.Require(Permission.ManageBatches);
+
+        var batch = FindBatch(batchId);
+        var recipe = FindRecipe(batch.RecipeId);
+        return Inventory.Inventory.Requirement(recipe, batch.VolumeL)
+            .Select(need =>
+            {
+                var line = recipe.Ingredients.First(item => item.CatalogId == need.Key);
+                return new PlannedWriteOff(line.Name, line.Unit, need.Value);
+            })
+            .ToList();
     }
 
     public void SetActualOg(int batchId, double og)

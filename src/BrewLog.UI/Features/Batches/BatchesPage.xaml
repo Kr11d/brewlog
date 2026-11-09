@@ -1,0 +1,209 @@
+<UserControl x:Class="BrewLog.UI.Features.Batches.BatchesPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="ClickableRow" TargetType="DataGridRow" BasedOn="{StaticResource CleanDataGrid.Row}">
+            <Setter Property="Cursor" Value="Hand" />
+            <EventSetter Event="MouseLeftButtonUp" Handler="OnRowClicked" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Шапка -->
+        <DockPanel DockPanel.Dock="Top" Margin="{StaticResource Gap.Bottom.24}">
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource PrimaryButton}"
+                    VerticalAlignment="Center"
+                    Command="{Binding PlanBatchCommand}"
+                    Content="Запланувати партію"
+                    Visibility="{Binding CanManage, Converter={StaticResource BoolToVisibility}}" />
+            <StackPanel>
+                <TextBlock Style="{StaticResource PageTitle}" Text="{Binding Title}" />
+                <TextBlock Style="{StaticResource PageSubtitle}" Margin="{StaticResource Gap.Top.4}" Text="{Binding Subtitle}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Режим показу й пошук -->
+        <Grid DockPanel.Dock="Top" Margin="{StaticResource Gap.Bottom.16}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Style="{StaticResource SegmentedGroup}">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Style="{StaticResource SegmentedButton}" Content="Дошка" IsChecked="{Binding IsBoardView}" />
+                    <RadioButton Style="{StaticResource SegmentedButton}" Content="Список" IsChecked="{Binding IsListView}" />
+                </StackPanel>
+            </Border>
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource SearchBox}"
+                     Margin="{StaticResource Gap.Left.16}"
+                     Tag="Пошук за номером або рецептом"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+
+        <Grid>
+            <!-- Дошка: колонки за етапами; якщо не вміщаються, прокручуються по горизонталі -->
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          Visibility="{Binding ShowBoard, Converter={StaticResource BoolToVisibility}}">
+                <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Columns}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource BoardColumn}">
+                                <DockPanel>
+                                    <DockPanel DockPanel.Dock="Top" Margin="{StaticResource Gap.Bottom.16}">
+                                        <Ellipse DockPanel.Dock="Left"
+                                                 Style="{StaticResource StageDot}"
+                                                 Margin="{StaticResource Gap.Right.8}"
+                                                 Fill="{Binding StateCode, Converter={StaticResource ResourceByKey}, ConverterParameter=Stage.}" />
+                                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource Caption}" VerticalAlignment="Center" Text="{Binding Count}" />
+                                        <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Title}" />
+                                    </DockPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Style="{StaticResource BoardCard}"
+                                                            Command="{Binding DataContext.OpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}">
+                                                        <StackPanel>
+                                                            <DockPanel>
+                                                                <TextBlock DockPanel.Dock="Right"
+                                                                           Style="{StaticResource Icon}"
+                                                                           FontSize="{StaticResource FontSize.Small}"
+                                                                           Foreground="{Binding SeverityCode, Converter={StaticResource ResourceByKey}, ConverterParameter=Severity.}"
+                                                                           Text="{StaticResource Glyph.Warning}"
+                                                                           ToolTip="{Binding AlertText}"
+                                                                           Visibility="{Binding HasAlert, Converter={StaticResource BoolToVisibility}}" />
+                                                                <TextBlock Style="{StaticResource Caption}" Text="{Binding Number}" />
+                                                            </DockPanel>
+                                                            <TextBlock Style="{StaticResource Body.Strong}" Margin="{StaticResource Gap.Top.4}" Text="{Binding RecipeName}" />
+                                                            <TextBlock Style="{StaticResource Caption}" Margin="{StaticResource Gap.Top.4}" Text="{Binding VolumeText}" />
+                                                            <TextBlock Style="{StaticResource Caption}" Text="{Binding DaysText}" />
+                                                            <TextBlock Style="{StaticResource Caption}">
+                                                                <Run Text="Густина" />
+                                                                <Run Text="{Binding GravityText, Mode=OneWay}" />
+                                                            </TextBlock>
+                                                            <DockPanel Margin="{StaticResource Gap.Top.8}">
+                                                                <Button DockPanel.Dock="Right"
+                                                                        Style="{StaticResource IconButton.Cell}"
+                                                                        Command="{Binding DataContext.AdvanceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="{StaticResource Glyph.ArrowRight}"
+                                                                        ToolTip="{Binding NextStageHint}"
+                                                                        Visibility="{Binding CanAdvance, Converter={StaticResource BoolToVisibility}}" />
+                                                                <ContentControl Style="{StaticResource Avatar.Small}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Content="{Binding AssistantName, Converter={StaticResource Initials}}"
+                                                                                ToolTip="{Binding AssistantName}"
+                                                                                Visibility="{Binding HasAssistant, Converter={StaticResource BoolToVisibility}}" />
+                                                            </DockPanel>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Список -->
+            <DataGrid Style="{StaticResource CleanDataGrid}"
+                      IsReadOnly="True"
+                      ItemsSource="{Binding Rows}"
+                      RowStyle="{StaticResource ClickableRow}"
+                      Visibility="{Binding ShowList, Converter={StaticResource BoolToVisibility}}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="{StaticResource Column.Wide}"
+                                        Binding="{Binding Number}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                        Header="Номер" />
+                    <DataGridTextColumn Width="*"
+                                        MinWidth="{StaticResource Column.MinWide}"
+                                        Binding="{Binding RecipeName}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                        Header="Рецепт" />
+                    <DataGridTemplateColumn Width="{StaticResource Column.Wide}" Header="Етап" SortMemberPath="StateOrder">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ContentControl Style="{Binding StateCode, Converter={StaticResource ResourceByKey}, ConverterParameter=Chip.}" Content="{Binding StateName}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                        MinWidth="{StaticResource Column.MinNumber}"
+                                        Binding="{Binding VolumeText}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                        Header="Обсяг"
+                                        HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
+                                        SortMemberPath="VolumeL" />
+                    <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                        MinWidth="{StaticResource Column.MinNumber}"
+                                        Binding="{Binding DaysInState}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                        Header="Днів"
+                                        HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                    <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                        MinWidth="{StaticResource Column.MinNumber}"
+                                        Binding="{Binding GravityText}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                        Header="Густина"
+                                        HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
+                                        SortMemberPath="Gravity" />
+                    <DataGridTextColumn Width="{StaticResource Column.Person}"
+                                        Binding="{Binding AssistantText}"
+                                        ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                        Header="Виконавець" />
+                    <DataGridTemplateColumn Width="{StaticResource Column.Icon}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Style="{StaticResource Icon}"
+                                           FontSize="{StaticResource FontSize.Small}"
+                                           Foreground="{Binding SeverityCode, Converter={StaticResource ResourceByKey}, ConverterParameter=Severity.}"
+                                           Text="{StaticResource Glyph.Warning}"
+                                           ToolTip="{Binding AlertText}"
+                                           Visibility="{Binding HasAlert, Converter={StaticResource BoolToVisibility}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="{StaticResource Column.Input}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource IconButton.Cell}"
+                                        Command="{Binding DataContext.AdvanceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{StaticResource Glyph.ArrowRight}"
+                                        ToolTip="{Binding NextStageHint}"
+                                        Visibility="{Binding CanAdvance, Converter={StaticResource BoolToVisibility}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Порожній стан -->
+            <ContentControl Style="{StaticResource Card}" Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ContentControl Style="{StaticResource IconBadge.Large}"
+                                    Margin="{StaticResource Gap.Bottom.24}"
+                                    Content="{StaticResource Glyph.Search}" />
+                    <TextBlock Style="{StaticResource SectionTitle}"
+                               HorizontalAlignment="Center"
+                               Margin="{StaticResource Gap.Bottom.8}"
+                               Text="{Binding EmptyTitle}" />
+                    <TextBlock Style="{StaticResource PageSubtitle}" HorizontalAlignment="Center" Text="{Binding EmptyHint}" />
+                </StackPanel>
+            </ContentControl>
+        </Grid>
+    </DockPanel>
+</UserControl>
