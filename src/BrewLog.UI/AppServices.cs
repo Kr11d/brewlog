@@ -7,6 +7,7 @@ using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Batches;
+using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.Measurements;
 using BrewLog.UI.Features.Recipes;
 using BrewLog.UI.Services;
@@ -110,5 +111,6 @@ public sealed class AppServices
         [AppSection.Batches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: false),
         [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
         [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
+        [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows),
     };
 }

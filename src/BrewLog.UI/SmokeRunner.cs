@@ -7,6 +7,7 @@ using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Common;
+using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
 using BrewLog.UI.Features.Users;
@@ -64,6 +65,11 @@ public static class SmokeRunner
             {
                 yield return ($"{user.RoleDisplayName}: NewBatchDialog", () => AsUser(services, user, () => services.Windows.CreateNewBatchDialog()));
                 yield return ($"{user.RoleDisplayName}: ActualOgDialog", () => AsUser(services, user, () => services.Windows.CreateActualOgDialog(BatchIn(services, new BrewingState()).Id, 1.050)));
+            }
+
+            if (user.Can(Permission.ManageStock))
+            {
+                yield return ($"{user.RoleDisplayName}: StockReceiptDialog", () => AsUser(services, user, () => services.Windows.CreateStockReceiptDialog()));
             }
 
             if (user.Can(Permission.EditRecipes))

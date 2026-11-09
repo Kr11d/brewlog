@@ -3,6 +3,7 @@ using BrewLog.Domain.Common;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.BatchCard;
 using BrewLog.UI.Features.Batches;
+using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.Login;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
@@ -118,6 +119,12 @@ public sealed class WindowService
         _services.Users,
         _services.Clock,
         _services.Dialogs));
+
+    /// <summary>Діалог приходу сировини; true — прихід оформлено.</summary>
+    public bool ShowStockReceipt() => ModalWindow.Show(CreateStockReceiptDialog()) == true;
+
+    public StockReceiptDialog CreateStockReceiptDialog() =>
+        new(new StockReceiptViewModel(_services.Inventory, _services.Clock, _services.Dialogs));
 
     private static void ShowAsMain(Window window)
     {

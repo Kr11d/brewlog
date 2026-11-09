@@ -16,6 +16,9 @@ public interface IStockRepository : IRepository<StockLot>
 
     IReadOnlyList<Supplier> GetSuppliers();
 
+    /// <summary>Додає постачальника й записує його ідентифікатор; повертає цей ідентифікатор.</summary>
+    int InsertSupplier(Supplier supplier);
+
     /// <summary>В одній транзакції додає партію, рух Receipt і оновлює останню ціну позиції; повертає ідентифікатор партії.</summary>
     int ReceiveLot(StockLot lot, int? userId);
 

@@ -32,6 +32,14 @@ public sealed class StockRepository : Repository<StockLot>, IStockRepository
 
     public IReadOnlyList<Supplier> GetSuppliers() => Query<Supplier>("SELECT * FROM suppliers ORDER BY name");
 
+    public int InsertSupplier(Supplier supplier)
+    {
+        supplier.Id = QuerySingle<int>(
+            "INSERT INTO suppliers (name, phone, email) VALUES (@Name, @Phone, @Email); SELECT last_insert_rowid();",
+            supplier);
+        return supplier.Id;
+    }
+
     public override int Insert(StockLot entity)
     {
         entity.Id = QuerySingle<int>($"{StockLotRow.InsertSql} SELECT last_insert_rowid();", StockLotRow.FromLot(entity));

@@ -113,6 +113,28 @@ public sealed class InventoryService
         return _stock.GetSuppliers();
     }
 
+    /// <summary>Знаходить постачальника за назвою без урахування регістру або створює нового: назва в таблиці унікальна.</summary>
+    public Supplier FindOrAddSupplier(string name)
+    {
+        _session.Require(Permission.ManageStock);
+
+        var trimmed = name.Trim();
+        if (trimmed.Length == 0)
+        {
+            throw new DomainException("Вкажіть назву постачальника.");
+        }
+
+        var existing = _stock.GetSuppliers().FirstOrDefault(item => string.Equals(item.Name, trimmed, StringComparison.CurrentCultureIgnoreCase));
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var supplier = new Supplier { Name = trimmed };
+        _stock.InsertSupplier(supplier);
+        return supplier;
+    }
+
     /// <summary>Ціна одиниці за HANDOFF §6.1: середньозважена по залишках, а без залишків — остання з довідника.</summary>
     public decimal CurrentUnitPrice(int catalogId) =>
         StockLot.AveragePrice(_stock.GetLotsOf(catalogId)) ?? _catalog.GetLastPrices().GetValueOrDefault(catalogId);
