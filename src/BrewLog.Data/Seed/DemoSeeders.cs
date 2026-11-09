@@ -14,5 +14,6 @@ public static class DemoSeeders
         new UserSeeder(passwordHasher),
         new CatalogSeeder(),
         new RecipeSeeder(),
+        new StockSeeder(),
     ];
 }

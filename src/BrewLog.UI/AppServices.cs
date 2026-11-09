@@ -33,7 +33,8 @@ public sealed class AppServices
         Auth = new AuthService(users, PasswordHasher);
         Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
-        Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock);
+        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, Session, Clock);
+        Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock, Inventory);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
@@ -57,6 +58,8 @@ public sealed class AppServices
     public UserService Users { get; }
 
     public CatalogService Catalog { get; }
+
+    public InventoryService Inventory { get; }
 
     public RecipeService Recipes { get; }
 
