@@ -88,7 +88,7 @@ public sealed class RecipeServiceTests : IDisposable
         _catalog.LastPrices[malt.CatalogId] = 40m;
         _catalog.LastPrices[hop.CatalogId] = 2m;
 
-        var cost = ServiceWith().EstimateCostPerLiter(RecipeOf(20, malt, hop, yeastWithoutPrice));
+        var cost = ServiceWith(Permission.ViewStock).EstimateCostPerLiter(RecipeOf(20, malt, hop, yeastWithoutPrice));
 
         Assert.Equal(13m, cost);
     }

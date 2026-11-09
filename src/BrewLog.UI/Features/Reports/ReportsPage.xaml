@@ -78,6 +78,9 @@
                 <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Right.8}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Собівартість за рецептами" />
+                        <TextBlock Style="{StaticResource Caption}"
+                                   Text="Розлитих партій ще немає"
+                                   Visibility="{Binding HasNoCostRows, Converter={StaticResource BoolToVisibility}}" />
                         <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
                                   controls:WheelForwarding.IsEnabled="True"
                                   IsReadOnly="True"
@@ -121,6 +124,9 @@
                 <ContentControl Grid.Column="1" Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Планова та фактична міцність" />
+                        <TextBlock Style="{StaticResource Caption}"
+                                   Text="Розлитих партій ще немає"
+                                   Visibility="{Binding HasNoAbvRows, Converter={StaticResource BoolToVisibility}}" />
                         <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
                                   controls:WheelForwarding.IsEnabled="True"
                                   IsReadOnly="True"
@@ -154,8 +160,7 @@
                                                         SortMemberPath="Difference">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Style="{StaticResource CleanDataGrid.Number}"
-                                                       FontWeight="SemiBold"
+                                            <TextBlock Style="{StaticResource CleanDataGrid.NumberStrong}"
                                                        Foreground="{Binding DifferenceBrush, Converter={StaticResource ResourceByKey}}"
                                                        Text="{Binding DifferenceText}" />
                                         </DataTemplate>

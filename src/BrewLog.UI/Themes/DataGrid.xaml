@@ -111,6 +111,14 @@
         <Setter Property="HorizontalAlignment" Value="Right" />
     </Style>
 
+    <Style x:Key="CleanDataGrid.TextStrong" TargetType="TextBlock" BasedOn="{StaticResource CleanDataGrid.Text}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="CleanDataGrid.NumberStrong" TargetType="TextBlock" BasedOn="{StaticResource CleanDataGrid.Number}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
     <!-- Другорядний дрібний текст, наприклад внесок рядка в редакторі. -->
     <Style x:Key="CleanDataGrid.Caption" TargetType="TextBlock" BasedOn="{StaticResource CleanDataGrid.Text}">
         <Setter Property="FontSize" Value="{StaticResource FontSize.Small}" />

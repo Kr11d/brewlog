@@ -7,7 +7,6 @@ using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Common;
-using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
 using BrewLog.UI.Features.Users;

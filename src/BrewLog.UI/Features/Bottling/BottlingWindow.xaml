@@ -90,6 +90,7 @@
                     Margin="{StaticResource Gap.Top.16}"
                     Command="{Binding ConfirmCommand}"
                     Content="Підтвердити розлив"
+                    IsDefault="True"
                     IsEnabled="{Binding CanConfirm}" />
             <Button Style="{StaticResource SecondaryButton}"
                     Margin="{StaticResource Gap.Top.8}"

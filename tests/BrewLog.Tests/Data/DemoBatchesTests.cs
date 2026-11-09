@@ -30,7 +30,7 @@ public sealed class DemoBatchesTests : IDisposable
             new IngredientCatalogRepository(_database.Connections),
             recipes,
             _batches,
-            new FakeSession(null, Permission.ViewStock),
+            new FakeSession(null, Permission.ManageBatches),
             new FixedClock(Noon));
 
         var planned = Assert.Single(_batches.GetPlanned());

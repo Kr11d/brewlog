@@ -209,6 +209,9 @@
                     <ContentControl Style="{StaticResource Card}"
                                     Margin="{StaticResource Gap.Top.16}"
                                     Visibility="{Binding CanManageStock, Converter={StaticResource BoolToVisibility}}">
+                        <ContentControl.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SaveItemCommand}" />
+                        </ContentControl.InputBindings>
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionTitle}" Text="Мінімум і ціна" />
                             <Grid>

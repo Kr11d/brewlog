@@ -39,12 +39,11 @@ public sealed class InventoryService
         return Load(now);
     }
 
-    /// <summary>
-    /// Чи вистачає сировини на партію. Дозволу складу не вимагає: перевірку запускає BatchService,
-    /// а результат містить лише нестачі цього рецепта.
-    /// </summary>
+    /// <summary>Чи вистачає сировини на партію. Потрібен дозвіл керувати партіями: перевірка належить плануванню й запуску варки.</summary>
     public StockCheckResult CheckAvailability(Recipe recipe, double volumeL)
     {
+        _session.Require(Permission.ManageBatches);
+
         var now = _clock.Now;
         return Load(now).Check(recipe, volumeL, now);
     }
@@ -139,8 +138,11 @@ public sealed class InventoryService
     }
 
     /// <summary>Ціна одиниці за HANDOFF §6.1: середньозважена по залишках, а без залишків — остання з довідника.</summary>
-    public decimal CurrentUnitPrice(int catalogId) =>
-        StockLot.AveragePrice(_stock.GetLotsOf(catalogId)) ?? _catalog.GetLastPrices().GetValueOrDefault(catalogId);
+    public decimal CurrentUnitPrice(int catalogId)
+    {
+        _session.Require(Permission.ViewStock);
+        return UnitPrice(catalogId);
+    }
 
     /// <summary>
     /// Потреба сировини для планової партії за ідентифікатором позиції. Рецепт читається напряму зі сховища:
@@ -197,8 +199,11 @@ public sealed class InventoryService
 
         var item = position.Item;
         var quantity = Math.Ceiling(missing / item.PurchaseStep - StockLot.QuantityTolerance) * item.PurchaseStep;
-        return new PurchaseOrderLine(item.CatalogId, item.Name, item.KindDisplayName, quantity, item.Unit, CurrentUnitPrice(item.CatalogId));
+        return new PurchaseOrderLine(item.CatalogId, item.Name, item.KindDisplayName, quantity, item.Unit, UnitPrice(item.CatalogId));
     }
+
+    private decimal UnitPrice(int catalogId) =>
+        StockLot.AveragePrice(_stock.GetLotsOf(catalogId)) ?? _catalog.GetLastPrices().GetValueOrDefault(catalogId);
 
     private Inventory.Inventory Load(DateTime now) => new(
         _catalog.GetAll(),
