@@ -6,6 +6,8 @@ using BrewLog.Data.Seed;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Batches;
+using BrewLog.UI.Features.Measurements;
 using BrewLog.UI.Features.Recipes;
 using BrewLog.UI.Services;
 
@@ -33,7 +35,9 @@ public sealed class AppServices
         Auth = new AuthService(users, PasswordHasher);
         Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
-        Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock);
+        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, Session, Clock);
+        Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock, Inventory);
+        Batches = new BatchService(new BatchRepository(Connections), recipes, styles, Recipes, Inventory, Session, Clock);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
@@ -58,7 +62,11 @@ public sealed class AppServices
 
     public CatalogService Catalog { get; }
 
+    public InventoryService Inventory { get; }
+
     public RecipeService Recipes { get; }
+
+    public BatchService Batches { get; }
 
     public DialogService Dialogs { get; }
 
@@ -99,5 +107,8 @@ public sealed class AppServices
     private Dictionary<AppSection, Func<object>> CreatePageFactories() => new()
     {
         [AppSection.Recipes] = () => new RecipesViewModel(Recipes, Catalog, Session, Dialogs, Windows),
+        [AppSection.Batches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: false),
+        [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
+        [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
     };
 }

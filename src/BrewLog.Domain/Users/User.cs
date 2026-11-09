@@ -42,6 +42,9 @@ public abstract class User : IEntity
 
     public bool Can(Permission permission) => Permissions.Contains(permission);
 
+    /// <summary>Чи має користувач доступ до партії з цим виконавцем. Типово — до будь-якої.</summary>
+    public virtual bool HasAccessToBatchOf(int? assistantId) => true;
+
     /// <summary>Перевіряє логін та ім'я. Повертає список помилок українською; порожній список означає, що дані коректні.</summary>
     public IReadOnlyList<string> Validate()
     {

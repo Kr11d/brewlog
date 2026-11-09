@@ -2,8 +2,10 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using BrewLog.Domain.Batches;
 using BrewLog.Domain.Recipes;
 using BrewLog.Domain.Users;
+using BrewLog.UI.Features.Batches;
 using BrewLog.UI.Features.Common;
 using BrewLog.UI.Features.RecipeEditor;
 using BrewLog.UI.Features.References;
@@ -47,6 +49,23 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: сторінка {section}", () => AsUser(services, user, () => CreatePage(services, section)));
             }
 
+            // Сторінка партій відкривається дошкою: список перевіряється окремо, бо прихована таблиця не компонується.
+            foreach (var section in user.Sections.Where(section => section is AppSection.Batches or AppSection.MyBatches))
+            {
+                yield return ($"{user.RoleDisplayName}: сторінка {section}, список", () => AsUser(services, user, () => CreateBatchesList(services, section)));
+            }
+
+            foreach (var state in BatchStateFactory.All)
+            {
+                yield return ($"{user.RoleDisplayName}: BatchCardWindow, {state.Code}", () => AsUser(services, user, () => services.Windows.CreateBatchCard(BatchIn(services, state).Id)));
+            }
+
+            if (user.Can(Permission.ManageBatches))
+            {
+                yield return ($"{user.RoleDisplayName}: NewBatchDialog", () => AsUser(services, user, () => services.Windows.CreateNewBatchDialog()));
+                yield return ($"{user.RoleDisplayName}: ActualOgDialog", () => AsUser(services, user, () => services.Windows.CreateActualOgDialog(BatchIn(services, new BrewingState()).Id, 1.050)));
+            }
+
             if (user.Can(Permission.EditRecipes))
             {
                 yield return ($"{user.RoleDisplayName}: RecipeEditorWindow, новий рецепт", () => AsUser(services, user, () => services.Windows.CreateRecipeEditor(null)));
@@ -71,6 +90,24 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: ResetPasswordDialog", () => AsUser(services, user, () => services.Windows.CreateResetPasswordDialog(user)));
             }
         }
+    }
+
+    private static Batch BatchIn(AppServices services, BatchState state) =>
+        services.Batches.GetAll().First(batch => batch.State.Code == state.Code);
+
+    /// <summary>Демо-даних у варці немає: партію створює той самий шлях, що й у застосунку, із плануванням і списанням сировини.</summary>
+    private static void StartDemoBrew(AppServices services)
+    {
+        var recipe = services.Recipes.GetAll().First(item => item.Name == "Irish Stout");
+        var batch = services.Batches.Plan(recipe.Id, recipe.BatchVolumeL, services.Clock.Now.Date, null);
+        services.Batches.Advance(batch.Id);
+    }
+
+    private static ContentControl CreateBatchesList(AppServices services, AppSection section)
+    {
+        var page = CreatePage(services, section);
+        ((BatchesViewModel)page.Content).IsBoardView = false;
+        return page;
     }
 
     /// <summary>Діалог «Користувачі» у стані нового запису: так перевіряються поля паролів, приховані для наявного.</summary>
@@ -151,6 +188,8 @@ public static class SmokeRunner
             log.WriteLine($"OK: БД ініціалізовано ({databasePath})");
             var demoUsers = SignInDemoUsers(services, log);
             LogDemoRecipes(services, log);
+            StartDemoBrew(services);
+            log.WriteLine("OK: планування партії й запуск варки зі списанням");
 
             var failures = Targets(services, demoUsers).Count(target => !TryCreate(target.Name, target.Create, log));
             return failures == 0 ? 0 : 1;

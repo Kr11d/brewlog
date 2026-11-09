@@ -13,19 +13,22 @@ public sealed class RecipeService
     private readonly IBeerXmlSerializer _beerXml;
     private readonly ICurrentSession _session;
     private readonly IClock _clock;
+    private readonly InventoryService _inventory;
 
     public RecipeService(
         IRecipeRepository recipes,
         IIngredientCatalogRepository catalog,
         IBeerXmlSerializer beerXml,
         ICurrentSession session,
-        IClock clock)
+        IClock clock,
+        InventoryService inventory)
     {
         _recipes = recipes;
         _catalog = catalog;
         _beerXml = beerXml;
         _session = session;
         _clock = clock;
+        _inventory = inventory;
     }
 
     public IReadOnlyList<Recipe> GetAll()
@@ -130,10 +133,7 @@ public sealed class RecipeService
         }
     }
 
-    /// <summary>
-    /// Собівартість сировини, грн/л: Σ кількість · ціна одиниці / обсяг.
-    /// Поки ціна — остання з довідника; перехід на ціни складу робить промт A1.
-    /// </summary>
+    /// <summary>Собівартість сировини, грн/л: Σ кількість · ціна одиниці / обсяг; ціну одиниці дає склад (HANDOFF §6.1).</summary>
     public decimal EstimateCostPerLiter(Recipe r)
     {
         if (!(r.BatchVolumeL > 0))
@@ -141,8 +141,7 @@ public sealed class RecipeService
             return 0;
         }
 
-        var prices = _catalog.GetLastPrices();
-        var total = r.Ingredients.Sum(line => (decimal)line.Amount * prices.GetValueOrDefault(line.CatalogId));
+        var total = r.Ingredients.Sum(line => (decimal)line.Amount * _inventory.CurrentUnitPrice(line.CatalogId));
         return total / (decimal)r.BatchVolumeL;
     }
 

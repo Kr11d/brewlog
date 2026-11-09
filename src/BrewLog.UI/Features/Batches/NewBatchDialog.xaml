@@ -1,0 +1,50 @@
+<Window x:Class="BrewLog.UI.Features.Batches.NewBatchDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Запланувати партію"
+        Style="{StaticResource MessageWindow}">
+    <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Pad.DialogShadow}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionTitle}" Text="Запланувати партію" />
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Рецепт" />
+            <ComboBox Style="{StaticResource InputCombo}"
+                      Tag="Оберіть рецепт"
+                      DisplayMemberPath="Title"
+                      ItemsSource="{Binding Recipes}"
+                      SelectedItem="{Binding SelectedRecipe}" />
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Обсяг, л" />
+            <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding VolumeField}" />
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Запланована дата" />
+            <DatePicker Tag="Оберіть дату" SelectedDate="{Binding PlannedDate}" />
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Виконавець-помічник" />
+            <ComboBox Style="{StaticResource InputCombo}"
+                      DisplayMemberPath="Title"
+                      ItemsSource="{Binding Assistants}"
+                      SelectedItem="{Binding SelectedAssistant}" />
+
+            <!-- Результат перевірки складу: запланувати можна й за нестачі -->
+            <TextBlock Style="{StaticResource Caption.Success}"
+                       Margin="{StaticResource Gap.Top.16}"
+                       Text="Сировини достатньо"
+                       Visibility="{Binding IsStockSufficient, Converter={StaticResource BoolToVisibility}}" />
+            <TextBlock Style="{StaticResource ErrorText}" Margin="{StaticResource Gap.Top.16}" Text="{Binding ShortageText}" />
+
+            <StackPanel Margin="{StaticResource Gap.Top.24}"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Style="{StaticResource SecondaryButton}"
+                        Margin="{StaticResource Gap.Right.8}"
+                        Content="Скасувати"
+                        IsCancel="True" />
+                <Button Style="{StaticResource PrimaryButton}"
+                        Command="{Binding ConfirmCommand}"
+                        Content="Запланувати"
+                        IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </ContentControl>
+</Window>

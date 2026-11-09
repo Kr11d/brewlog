@@ -28,6 +28,10 @@
     <DataGridLength x:Key="Column.Wide">140</DataGridLength>
     <DataGridLength x:Key="Column.Contribution">150</DataGridLength>
     <DataGridLength x:Key="Column.Icon">44</DataGridLength>
+    <DataGridLength x:Key="Column.Person">200</DataGridLength>
+    <sys:Double x:Key="Column.MinWide">180</sys:Double>
+    <DataGridLength x:Key="Column.Attention">250</DataGridLength>
+    <sys:Double x:Key="Row.TwoLines">64</sys:Double>
 
     <Style x:Key="CleanDataGrid.Gripper" TargetType="Thumb">
         <Setter Property="Width" Value="8" />
@@ -144,6 +148,21 @@
             </Setter.Value>
         </Setter>
         <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource Accent.Soft}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Рядок, який потребує уваги: контекст даних має NeedsAttention. Наведення й вибір оголошені повторно, щоб підсвітка їх не перекривала. -->
+    <Style x:Key="CleanDataGrid.AttentionRow" TargetType="DataGridRow" BasedOn="{StaticResource CleanDataGrid.Row}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding NeedsAttention}" Value="True">
+                <Setter Property="Background" Value="{StaticResource Warning.Soft}" />
+            </DataTrigger>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource Surface.Muted}" />
             </Trigger>

@@ -1,0 +1,224 @@
+<Window x:Class="BrewLog.UI.Features.BatchCard.BatchCardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:batchcard="clr-namespace:BrewLog.UI.Features.BatchCard"
+        xmlns:controls="clr-namespace:BrewLog.UI.Controls"
+        xmlns:scott="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
+        Title="Картка партії"
+        Style="{StaticResource EditorWindow}"
+        controls:CloseOnEscape.IsEnabled="True">
+    <DockPanel Margin="{StaticResource Pad.Shell}">
+        <!-- Дії: лише для тих, хто керує партіями -->
+        <ContentControl DockPanel.Dock="Bottom"
+                        Style="{StaticResource Card}"
+                        Margin="{StaticResource Gap.Top.16}"
+                        Visibility="{Binding Details.ShowActions, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Margin="{StaticResource Gap.Left.8}"
+                            Command="{Binding EnterActualOgCommand}"
+                            Content="Ввести фактичну OG"
+                            Visibility="{Binding Details.ShowActualOg, Converter={StaticResource BoolToVisibility}}" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Margin="{StaticResource Gap.Left.8}"
+                            Command="{Binding PackageCommand}"
+                            Content="Оформити розлив"
+                            Visibility="{Binding Details.ShowPackaging, Converter={StaticResource BoolToVisibility}}" />
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Margin="{StaticResource Gap.Left.8}"
+                            Command="{Binding AdvanceCommand}"
+                            Content="{Binding Details.AdvanceText}"
+                            IsEnabled="{Binding Details.CanAdvanceNow}"
+                            ToolTip="{Binding Details.AdvanceReason}"
+                            ToolTipService.IsEnabled="{Binding Details.HasAdvanceReason}"
+                            ToolTipService.ShowOnDisabled="True"
+                            Visibility="{Binding Details.ShowAdvance, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+                <TextBlock Style="{StaticResource ErrorText}" VerticalAlignment="Center" Text="{Binding Details.AdvanceReason}" />
+            </DockPanel>
+        </ContentControl>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="{StaticResource Gap.Right.8}">
+                <!-- Документ-картка партії -->
+                <ContentControl Style="{StaticResource DocCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <!-- Білий підклад: тонований фон чипа на градієнті нечитабельний -->
+                            <Border DockPanel.Dock="Right" Background="{StaticResource Surface}" CornerRadius="{StaticResource Radius.Input}">
+                                <ContentControl Style="{Binding Details.StateCode, Converter={StaticResource ResourceByKey}, ConverterParameter=Chip.}"
+                                                Content="{Binding Details.StateName}" />
+                            </Border>
+                            <TextBlock Style="{StaticResource Caption.OnAccent}" Text="{Binding Details.Number}" />
+                        </DockPanel>
+                        <TextBlock Style="{StaticResource PageTitle}" Margin="{StaticResource Gap.Top.4}" Text="{Binding Details.RecipeName}" />
+                        <TextBlock Style="{StaticResource Caption.OnAccent}" Text="{Binding Details.StyleText}" />
+                        <UniformGrid Margin="{StaticResource Gap.Top.16}" Rows="1">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Обсяг" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.VolumeText}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Планова ABV" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.PlannedAbvText}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Фактична ABV" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.ActualAbvText}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Фактична OG" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.ActualOgText}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Заплановано на" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.PlannedDateText}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Зварено" />
+                                <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding Details.BrewedText}" />
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </ContentControl>
+
+                <!-- Шкала етапів -->
+                <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Top.16}">
+                    <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Details.Steps}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Style="{StaticResource StepLine}" Visibility="{Binding HasLeftLine, Converter={StaticResource BoolToVisibility}}" />
+                                        <Border Grid.Column="1" Style="{StaticResource StepLine}" Visibility="{Binding HasRightLine, Converter={StaticResource BoolToVisibility}}" />
+                                        <ContentControl Grid.ColumnSpan="2" Style="{StaticResource StepBadge}" Content="{Binding Number}" />
+                                    </Grid>
+                                    <TextBlock Style="{StaticResource Body.Strong}"
+                                               Margin="{StaticResource Gap.Top.8}"
+                                               HorizontalAlignment="Center"
+                                               Text="{Binding Title}" />
+                                    <TextBlock Style="{StaticResource Caption}" HorizontalAlignment="Center" Text="{Binding DateText}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ContentControl>
+
+                <Grid Margin="{StaticResource Gap.Top.16}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="{StaticResource Width.CardSide}" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Графіки -->
+                    <StackPanel>
+                        <ContentControl Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Густина" />
+                                <Grid Height="{StaticResource Height.Chart}">
+                                    <scott:WpfPlot x:Name="GravityPlot" Visibility="{Binding Details.HasGravity, Converter={StaticResource BoolToVisibility}}" />
+                                    <TextBlock Style="{StaticResource PageSubtitle}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="Вимірів густини ще немає"
+                                               Visibility="{Binding Details.HasNoGravity, Converter={StaticResource BoolToVisibility}}" />
+                                </Grid>
+                            </StackPanel>
+                        </ContentControl>
+                        <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Top.16}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Температура" />
+                                <Grid Height="{StaticResource Height.Chart}">
+                                    <scott:WpfPlot x:Name="TemperaturePlot" Visibility="{Binding Details.HasTemperature, Converter={StaticResource BoolToVisibility}}" />
+                                    <TextBlock Style="{StaticResource PageSubtitle}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="Вимірів температури ще немає"
+                                               Visibility="{Binding Details.HasNoTemperature, Converter={StaticResource BoolToVisibility}}" />
+                                </Grid>
+                            </StackPanel>
+                        </ContentControl>
+                    </StackPanel>
+
+                    <!-- Новий вимір, попередження, таблиця -->
+                    <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+                        <ContentControl Style="{StaticResource Card}"
+                                        Margin="{StaticResource Gap.Bottom.16}"
+                                        Visibility="{Binding Details.ShowMeasurementForm, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitle}" Text="Новий вимір" />
+                                <batchcard:MeasurementForm DataContext="{Binding Form}" />
+                            </StackPanel>
+                        </ContentControl>
+
+                        <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Bottom.16}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Попередження" />
+                                <TextBlock Style="{StaticResource Caption.Success}"
+                                           Text="Усе гаразд"
+                                           Visibility="{Binding Details.HasNoAlerts, Converter={StaticResource BoolToVisibility}}" />
+                                <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Details.Alerts}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel Margin="{StaticResource Gap.Bottom.8}">
+                                                <TextBlock DockPanel.Dock="Left"
+                                                           Style="{StaticResource Icon}"
+                                                           Margin="{StaticResource Gap.Right.8}"
+                                                           VerticalAlignment="Top"
+                                                           Foreground="{Binding Severity, Converter={StaticResource ResourceByKey}, ConverterParameter=Severity.}"
+                                                           Text="{StaticResource Glyph.Warning}" />
+                                                <TextBlock Style="{StaticResource Body}" Text="{Binding Message}" />
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ContentControl>
+
+                        <ContentControl Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Виміри" />
+                                <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
+                                          MaxHeight="{StaticResource Height.MeasurementsTable}"
+                                          IsReadOnly="True"
+                                          ItemsSource="{Binding Details.Measurements}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="{StaticResource Column.Wide}"
+                                                            Binding="{Binding DateText}"
+                                                            ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                                            Header="Дата"
+                                                            SortMemberPath="MeasuredAt" />
+                                        <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                                            Binding="{Binding GravityText}"
+                                                            ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                            Header="Густина"
+                                                            HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                        <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                                            Binding="{Binding TemperatureText}"
+                                                            ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                            Header="Темп."
+                                                            HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                        <DataGridTextColumn Width="*"
+                                                            Binding="{Binding Note}"
+                                                            ElementStyle="{StaticResource CleanDataGrid.Caption}"
+                                                            Header="Нотатка" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </ContentControl>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

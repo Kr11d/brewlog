@@ -21,4 +21,7 @@ public sealed class Assistant : User
     public override IReadOnlySet<Permission> Permissions => RolePermissions;
 
     public override IReadOnlyList<AppSection> Sections => RoleSections;
+
+    /// <summary>Помічник працює лише зі своїми партіями та партіями без виконавця.</summary>
+    public override bool HasAccessToBatchOf(int? assistantId) => assistantId is null || assistantId == Id;
 }

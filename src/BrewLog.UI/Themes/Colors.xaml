@@ -68,6 +68,14 @@
     <SolidColorBrush x:Key="Stage.Conditioning.Soft" Color="{StaticResource Stage.Conditioning.Color}" Opacity="0.12" />
     <SolidColorBrush x:Key="Stage.Packaged.Soft" Color="{StaticResource Stage.Packaged.Color}" Opacity="0.12" />
 
+    <!-- Рівні попереджень: імена збігаються з Severity, тож колір вибирається за назвою рівня. -->
+    <SolidColorBrush x:Key="Severity.Info" Color="{StaticResource Info.Color}" />
+    <SolidColorBrush x:Key="Severity.Warning" Color="{StaticResource Warning.Color}" />
+    <SolidColorBrush x:Key="Severity.Error" Color="{StaticResource Danger.Color}" />
+
+    <!-- Напівпрозора колонка дошки партій на градієнтному фоні. -->
+    <SolidColorBrush x:Key="Board.Column" Color="{StaticResource Surface.Color}" Opacity="0.55" />
+
     <SolidColorBrush x:Key="Scroll.Thumb" Color="{StaticResource Text.Secondary.Color}" Opacity="0.35" />
     <SolidColorBrush x:Key="Scroll.Thumb.Hover" Color="{StaticResource Text.Secondary.Color}" Opacity="0.6" />
 

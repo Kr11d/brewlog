@@ -32,6 +32,8 @@
     <sys:String x:Key="Glyph.Search">&#xE721;</sys:String>
     <sys:String x:Key="Glyph.Recipe">&#xE82D;</sys:String>
     <sys:String x:Key="Glyph.Delete">&#xE74D;</sys:String>
+    <sys:String x:Key="Glyph.Warning">&#xE7BA;</sys:String>
+    <sys:String x:Key="Glyph.ArrowRight">&#xE72A;</sys:String>
 
     <!--
       Стилі тексту. PageTitle, SectionTitle, Body і BigNumber не задають колір: він успадковується,
@@ -89,6 +91,11 @@
                 <Setter Property="Visibility" Value="Collapsed" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- Позитивний результат перевірки під формою. -->
+    <Style x:Key="Caption.Success" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+        <Setter Property="Foreground" Value="{StaticResource Success}" />
     </Style>
 
     <!-- Підпис шкали стилю: контекст даних має властивість IsWithin. -->

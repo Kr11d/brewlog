@@ -41,6 +41,13 @@ public sealed class UserService
         return _users.GetAll().OfType<Assistant>().Where(user => user.IsActive).ToList<User>();
     }
 
+    /// <summary>Імена користувачів за ідентифікатором: щоб показати виконавця партії тим, хто не має доступу до списку користувачів.</summary>
+    public IReadOnlyDictionary<int, string> GetDisplayNames()
+    {
+        _session.Require(Permission.ViewBatches);
+        return _users.GetAll().ToDictionary(user => user.Id, user => user.FullName);
+    }
+
     /// <summary>Перевіряє дані й створює активний обліковий запис; пароль зберігається лише як хеш.</summary>
     public User Create(string login, string fullName, UserRole role, string password)
     {

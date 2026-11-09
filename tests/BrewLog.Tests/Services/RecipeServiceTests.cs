@@ -176,6 +176,11 @@ public sealed class RecipeServiceTests : IDisposable
 
     public void Dispose() => File.Delete(_tempFile);
 
-    private RecipeService ServiceWith(params Permission[] permissions) =>
-        new(_recipes, _catalog, new BeerXmlSerializer(new FakeStyleRepository()), new FakeSession(null, permissions), new FixedClock(Now));
+    private RecipeService ServiceWith(params Permission[] permissions)
+    {
+        var session = new FakeSession(null, permissions);
+        var clock = new FixedClock(Now);
+        var inventory = new InventoryService(new FakeStockRepository(), _catalog, _recipes, session, clock);
+        return new RecipeService(_recipes, _catalog, new BeerXmlSerializer(new FakeStyleRepository()), session, clock, inventory);
+    }
 }

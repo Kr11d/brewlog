@@ -1,0 +1,44 @@
+<UserControl x:Class="BrewLog.UI.Features.BatchCard.MeasurementForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Return" Command="{Binding AddCommand}" />
+    </UserControl.InputBindings>
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="{StaticResource Gap.Right.8}">
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Дата" />
+                <DatePicker Tag="Оберіть дату" SelectedDate="{Binding Date}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Час" />
+                <TextBox Style="{StaticResource InputBox}" Tag="14:30" Text="{Binding TimeText, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="{StaticResource Gap.Right.8}">
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Густина" />
+                <TextBox Style="{StaticResource InputBox}" Tag="1,012" Text="{Binding GravityText, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Температура, °C" />
+                <TextBox Style="{StaticResource InputBox}" Tag="20,5" Text="{Binding TemperatureText, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Grid>
+        <TextBlock Style="{StaticResource FieldLabel}" Text="Нотатка" />
+        <TextBox Style="{StaticResource InputBox}" Tag="Необов'язково" Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Style="{StaticResource PrimaryButton}"
+                Margin="{StaticResource Gap.Top.16}"
+                HorizontalAlignment="Right"
+                Command="{Binding AddCommand}"
+                Content="Додати" />
+    </StackPanel>
+</UserControl>
