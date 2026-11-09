@@ -1,4 +1,3 @@
-using System.IO;
 using BrewLog.Data.Export;
 using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Common;
@@ -162,7 +161,7 @@ public sealed partial class InventoryViewModel : ObservableObject
         var path = _dialogs.PickFileToSave("PDF (*.pdf)|*.pdf", "Замовлення постачальнику", $"{order.Number}.pdf");
         if (path is not null)
         {
-            await SaveAndOpenAsync(() => _orderPdf.Save(order, path), path);
+            await _dialogs.SaveAndOpenAsync(() => _orderPdf.Save(order, path), path);
         }
     }
 
@@ -180,20 +179,7 @@ public sealed partial class InventoryViewModel : ObservableObject
         var positions = _inventory.GetInventory(now).Positions(now);
         var lots = _inventory.GetLots();
         var suppliers = _inventory.GetSuppliers().ToDictionary(supplier => supplier.Id, supplier => supplier.Name);
-        await SaveAndOpenAsync(() => _stockExcel.Export(positions, lots, suppliers, path), path);
-    }
-
-    private async Task SaveAndOpenAsync(Action save, string path)
-    {
-        try
-        {
-            await Task.Run(save);
-            _dialogs.OpenFile(path);
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-        {
-            _dialogs.ShowError($"Не вдалося записати файл «{Path.GetFileName(path)}». Перевірте, що він не відкритий в іншій програмі й що є дозвіл на запис.");
-        }
+        await _dialogs.SaveAndOpenAsync(() => _stockExcel.Export(positions, lots, suppliers, path), path);
     }
 
     [RelayCommand]

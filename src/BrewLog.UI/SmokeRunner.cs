@@ -67,6 +67,11 @@ public static class SmokeRunner
                 yield return ($"{user.RoleDisplayName}: ActualOgDialog", () => AsUser(services, user, () => services.Windows.CreateActualOgDialog(BatchIn(services, new BrewingState()).Id, 1.050)));
             }
 
+            if (user.Can(Permission.PackageBatches))
+            {
+                yield return ($"{user.RoleDisplayName}: BottlingWindow", () => AsUser(services, user, () => services.Windows.CreateBottlingWindow(BatchIn(services, new ConditioningState()).Id)));
+            }
+
             if (user.Can(Permission.ManageStock))
             {
                 yield return ($"{user.RoleDisplayName}: StockReceiptDialog", () => AsUser(services, user, () => services.Windows.CreateStockReceiptDialog()));

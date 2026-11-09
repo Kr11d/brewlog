@@ -41,6 +41,20 @@ public sealed class DialogService
         return dialog.ShowDialog() == true ? dialog.FileName : null;
     }
 
+    /// <summary>Записує файл у фоні й відкриває його; помилку запису показує користувачу.</summary>
+    public async Task SaveAndOpenAsync(Action save, string path)
+    {
+        try
+        {
+            await Task.Run(save);
+            OpenFile(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            ShowError($"Не вдалося записати файл «{Path.GetFileName(path)}». Перевірте, що він не відкритий в іншій програмі й що є дозвіл на запис.");
+        }
+    }
+
     /// <summary>Відкриває файл програмою, яка призначена для нього в системі; якщо такої немає, повідомляє, що файл збережено.</summary>
     public void OpenFile(string path)
     {

@@ -92,8 +92,7 @@ public sealed class Batch : IEntity
         ActualOg is { } og && og > 1 && CurrentGravity is { } current ? (og - current) / (og - 1) * 100 : null;
 
     /// <summary>Фактична міцність, %, за HANDOFF §6.2; відома лише після розливу з кінцевою густиною.</summary>
-    public double? ActualAbv =>
-        ActualOg is { } og && Packaging?.FinalGravity is { } finalGravity ? (og - finalGravity) * AbvFactor : null;
+    public double? ActualAbv => Packaging?.FinalGravity is { } finalGravity ? AbvAt(finalGravity) : null;
 
     /// <summary>Чи лежить густина в межах, можливих для виміряного сусла чи пива.</summary>
     public static bool IsMeasurableGravity(double gravity) => gravity is >= 0.990 and <= 1.150;
@@ -182,12 +181,25 @@ public sealed class Batch : IEntity
             throw new DomainException($"На етапі «{State.DisplayName}» розлив не оформлюють.");
         }
 
-        DomainException.ThrowIfAny(packaging.Validate());
+        DomainException.ThrowIfAny(ValidatePackaging(packaging));
+        _packaging = packaging with { BatchId = Id, LossL = LossFor(packaging) };
+    }
+
+    /// <summary>Перевіряє розлив щодо цієї партії; порожній список означає, що розлив можна прийняти.</summary>
+    public IReadOnlyList<string> ValidatePackaging(Packaging packaging)
+    {
+        var errors = new List<string>(packaging.Validate());
         if (packaging.PackagedVolumeL > VolumeL + VolumeTolerance)
         {
-            throw new DomainException("Розлитий обсяг не може перевищувати обсяг партії.");
+            errors.Add("Розлитий обсяг не може перевищувати обсяг партії.");
         }
 
-        _packaging = packaging with { BatchId = Id, LossL = Math.Max(VolumeL - packaging.PackagedVolumeL, 0) };
+        return errors;
     }
+
+    /// <summary>Втрати розливу, л: обсяг партії мінус розлите, не менше 0.</summary>
+    public double LossFor(Packaging packaging) => Math.Max(VolumeL - packaging.PackagedVolumeL, 0);
+
+    /// <summary>Міцність, %, за такої кінцевої густини; null, якщо фактичну OG ще не введено. Для підсумку до підтвердження розливу.</summary>
+    public double? AbvAt(double finalGravity) => ActualOg is { } og ? (og - finalGravity) * AbvFactor : null;
 }

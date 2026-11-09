@@ -1,0 +1,105 @@
+<Window x:Class="BrewLog.UI.Features.Bottling.BottlingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Розлив партії"
+        Style="{StaticResource DialogWindow}">
+    <Grid Margin="{StaticResource Pad.Shell}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource Width.PreviewPane}" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Форма розливу -->
+        <ContentControl Style="{StaticResource Card}" VerticalContentAlignment="Top">
+            <StackPanel IsEnabled="{Binding IsEditable}">
+                <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding Title}" />
+                <TextBlock Style="{StaticResource PageSubtitle}" Margin="{StaticResource Gap.Top.4}">
+                    <Run Text="Обсяг партії:" />
+                    <Run Text="{Binding VolumeText, Mode=OneWay}" />
+                </TextBlock>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Пляшки: кількість і обсяг" />
+                <DockPanel>
+                    <Border DockPanel.Dock="Right" Style="{StaticResource SegmentedGroup}" Margin="{StaticResource Gap.Left.16}">
+                        <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding BottleVolumes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton Style="{StaticResource SegmentedButton}"
+                                                 GroupName="BottleVolume"
+                                                 Command="{Binding DataContext.SelectBottleVolumeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                 CommandParameter="{Binding Value}"
+                                                 Content="{Binding Title}"
+                                                 IsChecked="{Binding IsDefault, Mode=OneTime}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding BottlesField}" />
+                </DockPanel>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Кеги: кількість і обсяг" />
+                <DockPanel>
+                    <Border DockPanel.Dock="Right" Style="{StaticResource SegmentedGroup}" Margin="{StaticResource Gap.Left.16}">
+                        <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding KegVolumes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton Style="{StaticResource SegmentedButton}"
+                                                 GroupName="KegVolume"
+                                                 Command="{Binding DataContext.SelectKegVolumeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                 CommandParameter="{Binding Value}"
+                                                 Content="{Binding Title}"
+                                                 IsChecked="{Binding IsDefault, Mode=OneTime}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding KegsField}" />
+                </DockPanel>
+
+                <TextBlock Style="{StaticResource FieldLabel}" Text="Кінцева густина" />
+                <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding FinalGravityField}" />
+
+                <TextBlock Style="{StaticResource ErrorText}" Margin="{StaticResource Gap.Top.16}" Text="{Binding ValidationText}" />
+            </StackPanel>
+        </ContentControl>
+
+        <!-- Живий підсумок і дії -->
+        <StackPanel Grid.Column="1" Margin="{StaticResource Gap.Left.16}">
+            <ContentControl Style="{StaticResource DocCard}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Caption.OnAccent}" Text="Розлито" />
+                    <TextBlock Style="{StaticResource HeroNumber}" Text="{Binding PackagedText}" />
+                    <TextBlock Style="{StaticResource Caption.OnAccent}" Margin="{StaticResource Gap.Top.16}" Text="Втрати" />
+                    <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding LossText}" />
+                    <TextBlock Style="{StaticResource Caption.OnAccent}" Margin="{StaticResource Gap.Top.16}" Text="Фактична ABV" />
+                    <TextBlock Style="{StaticResource Body.Strong}" Text="{Binding AbvText}" />
+                </StackPanel>
+            </ContentControl>
+
+            <Button Style="{StaticResource PrimaryButton}"
+                    Margin="{StaticResource Gap.Top.16}"
+                    Command="{Binding ConfirmCommand}"
+                    Content="Підтвердити розлив"
+                    IsEnabled="{Binding CanConfirm}" />
+            <Button Style="{StaticResource SecondaryButton}"
+                    Margin="{StaticResource Gap.Top.8}"
+                    Command="{Binding PrintLabelsCommand}"
+                    Content="Друк етикеток"
+                    IsEnabled="{Binding CanPrint}" />
+            <Button Style="{StaticResource TextButton}"
+                    Margin="{StaticResource Gap.Top.8}"
+                    Content="Закрити"
+                    IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

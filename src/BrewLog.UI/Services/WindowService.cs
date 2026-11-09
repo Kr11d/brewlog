@@ -2,8 +2,10 @@ using System.Windows;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Inventory;
 using BrewLog.Domain.Users;
+using BrewLog.Data.Export;
 using BrewLog.UI.Features.BatchCard;
 using BrewLog.UI.Features.Batches;
+using BrewLog.UI.Features.Bottling;
 using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.Login;
 using BrewLog.UI.Features.RecipeEditor;
@@ -135,6 +137,12 @@ public sealed class WindowService
     }
 
     public PurchaseOrderDialog CreatePurchaseOrderDialog() => new(new PurchaseOrderViewModel(_services.Inventory, _services.Dialogs));
+
+    /// <exception cref="DomainException">Партії немає або немає доступу до неї.</exception>
+    public void ShowBottling(int batchId) => ModalWindow.Show(CreateBottlingWindow(batchId));
+
+    public BottlingWindow CreateBottlingWindow(int batchId) =>
+        new(new BottlingViewModel(batchId, _services.Batches, _services.Dialogs, new LabelPdfGenerator()));
 
     private static void ShowAsMain(Window window)
     {
