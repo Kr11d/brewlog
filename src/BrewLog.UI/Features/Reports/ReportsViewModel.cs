@@ -1,4 +1,6 @@
+using BrewLog.Data.Export;
 using BrewLog.Domain.Abstractions;
+using BrewLog.Domain.Reports;
 using BrewLog.Domain.Services;
 using BrewLog.UI.Formatting;
 using BrewLog.UI.Services;
@@ -10,9 +12,20 @@ namespace BrewLog.UI.Features.Reports;
 /// <summary>Сторінка «Звіти»: показники вибраного місяця, обсяг за 12 місяців, собівартість і порівняння міцності.</summary>
 public sealed partial class ReportsViewModel : ObservableObject
 {
+    private const int ChartImageWidth = 1200;
+    private const int ChartImageHeight = 420;
+
     private readonly ReportService _reports;
+    private readonly IClock _clock;
     private readonly DialogService _dialogs;
+    private readonly ReportExcelExporter _excel;
+    private readonly ReportPdfExporter _pdf;
     private readonly DateTime _currentMonth;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportExcelCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportPdfCommand))]
+    private bool _isExporting;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MonthTitle))]
@@ -40,10 +53,13 @@ public sealed partial class ReportsViewModel : ObservableObject
     [ObservableProperty]
     private IReadOnlyList<AbvComparisonViewRow> _abvRows = [];
 
-    public ReportsViewModel(ReportService reports, IClock clock, DialogService dialogs)
+    public ReportsViewModel(ReportService reports, IClock clock, DialogService dialogs, ReportExcelExporter excel, ReportPdfExporter pdf)
     {
         _reports = reports;
+        _clock = clock;
         _dialogs = dialogs;
+        _excel = excel;
+        _pdf = pdf;
 
         var now = clock.Now;
         _currentMonth = new DateTime(now.Year, now.Month, 1);
@@ -71,11 +87,54 @@ public sealed partial class ReportsViewModel : ObservableObject
         Reload();
     }
 
-    [RelayCommand]
-    private void ExportExcel() => _dialogs.ShowInfo("Буде в A11");
+    [RelayCommand(CanExecute = nameof(CanExport))]
+    private async Task ExportExcelAsync()
+    {
+        var path = _dialogs.PickFileToSave("Excel (*.xlsx)|*.xlsx", "Експорт звіту", SuggestedName("xlsx"));
+        if (path is null)
+        {
+            return;
+        }
 
-    [RelayCommand]
-    private void ExportPdf() => _dialogs.ShowInfo("Буде в A11");
+        var report = LoadReport();
+        await RunExportAsync(() => _excel.Export(report, path), path);
+    }
+
+    /// <summary>Зображення графіка готується тут: ScottPlot бере кольори з теми в потоці інтерфейсу.</summary>
+    [RelayCommand(CanExecute = nameof(CanExport))]
+    private async Task ExportPdfAsync()
+    {
+        var path = _dialogs.PickFileToSave("PDF (*.pdf)|*.pdf", "Експорт звіту", SuggestedName("pdf"));
+        if (path is null)
+        {
+            return;
+        }
+
+        var report = LoadReport();
+        var chart = VolumeChart.RenderPng(Bars, ChartImageWidth, ChartImageHeight);
+        var generatedAt = _clock.Now;
+        await RunExportAsync(() => _pdf.Save(report, chart, generatedAt, path), path);
+    }
+
+    /// <summary>Обидві кнопки вимкнені, доки створюється будь-який із файлів.</summary>
+    private async Task RunExportAsync(Action save, string path)
+    {
+        IsExporting = true;
+        try
+        {
+            await _dialogs.SaveAndOpenAsync(save, path);
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    private MonthReport LoadReport() => _reports.GetMonthReport(SelectedMonth.Year, SelectedMonth.Month);
+
+    private string SuggestedName(string extension) => $"Звіт-{DisplayFormat.MonthAndYear(SelectedMonth)}.{extension}";
+
+    private bool CanExport() => !IsExporting;
 
     private bool CanGoToNextMonth() => SelectedMonth < _currentMonth;
 

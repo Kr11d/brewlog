@@ -119,7 +119,7 @@ public sealed class AppServices
         [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
         [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
         [AppSection.Bottling] = () => new BottlingPageViewModel(Batches, Clock, Dialogs, Windows),
-        [AppSection.Reports] = () => new ReportsViewModel(Reports, Clock, Dialogs),
+        [AppSection.Reports] = () => new ReportsViewModel(Reports, Clock, Dialogs, new ReportExcelExporter(), new ReportPdfExporter()),
         [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows, new PurchaseOrderPdf(), new StockExcelExporter()),
     };
 }

@@ -19,6 +19,10 @@ public sealed class ReportService
         _session = session;
     }
 
+    /// <summary>Повний звіт за місяць для експорту.</summary>
+    public MonthReport GetMonthReport(int year, int month) =>
+        new(GetMonthSummary(year, month), GetVolumeByMonth(year, month), GetCostByRecipe(), GetAbvComparison());
+
     /// <summary>Зварене рахується за датою варки, усе інше — за датою розливу в цьому місяці.</summary>
     public MonthSummary GetMonthSummary(int year, int month)
     {
