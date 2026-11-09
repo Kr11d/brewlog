@@ -28,7 +28,7 @@
                             <DataTemplate>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Style="{StaticResource CleanDataGrid.Caption}" Text="{Binding Number}" />
-                                    <TextBlock Style="{StaticResource CleanDataGrid.Text}" FontWeight="SemiBold" Text="{Binding RecipeName}" />
+                                    <TextBlock Style="{StaticResource CleanDataGrid.TextStrong}" Text="{Binding RecipeName}" />
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

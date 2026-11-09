@@ -121,6 +121,8 @@ public sealed class BatchDetailsViewModel
     /// <summary>Виміри, новіші зверху.</summary>
     public IReadOnlyList<MeasurementRowViewModel> Measurements { get; }
 
+    public bool HasNoMeasurements => Measurements.Count == 0;
+
     public bool ShowMeasurementForm { get; }
 
     public bool ShowActions { get; }

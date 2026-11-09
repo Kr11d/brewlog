@@ -27,7 +27,6 @@ public sealed class BatchItemViewModel
         RequiresStock = batch.State.RequiresStock;
         CanAdvance = canManage && IsActive;
         NextStageHint = $"Перейти: {batch.State.Next().DisplayName}";
-        NextStageName = batch.State.Next().DisplayName;
         SeverityCode = alerts.Count > 0 ? alerts.Max(alert => alert.Severity).ToString() : string.Empty;
         AlertText = string.Join(Environment.NewLine, alerts.Select(alert => alert.Message));
     }
@@ -74,8 +73,6 @@ public sealed class BatchItemViewModel
     public bool CanAdvance { get; }
 
     public string NextStageHint { get; }
-
-    public string NextStageName { get; }
 
     /// <summary>Назва найвищого рівня попереджень; порожня, якщо їх немає.</summary>
     public string SeverityCode { get; }

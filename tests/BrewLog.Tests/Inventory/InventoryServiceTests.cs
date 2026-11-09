@@ -88,7 +88,7 @@ public sealed class InventoryServiceTests
         malt.Amount = 10;
         hop.Amount = 160;
 
-        var result = ServiceWith().CheckAvailability(RecipeOf(50, malt, hop), 50);
+        var result = ServiceWith(Permission.ManageBatches).CheckAvailability(RecipeOf(50, malt, hop), 50);
 
         Assert.False(result.IsSufficient);
         var shortage = Assert.Single(result.Shortages);
@@ -140,7 +140,7 @@ public sealed class InventoryServiceTests
             AddLot(malt, left: 30, price: 60m);
         }
 
-        Assert.Equal((decimal)expected, ServiceWith().CurrentUnitPrice(malt.CatalogId));
+        Assert.Equal((decimal)expected, ServiceWith(Permission.ViewStock).CurrentUnitPrice(malt.CatalogId));
     }
 
     private T AddToCatalog<T>(T item) where T : Ingredient

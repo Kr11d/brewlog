@@ -48,9 +48,11 @@ public sealed partial class ReportsViewModel : ObservableObject
     private IReadOnlyList<MonthBar> _bars = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoCostRows))]
     private IReadOnlyList<RecipeCostViewRow> _costRows = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoAbvRows))]
     private IReadOnlyList<AbvComparisonViewRow> _abvRows = [];
 
     public ReportsViewModel(ReportService reports, IClock clock, DialogService dialogs, ReportExcelExporter excel, ReportPdfExporter pdf)
@@ -71,6 +73,10 @@ public sealed partial class ReportsViewModel : ObservableObject
     public event Action? ChartChanged;
 
     public string MonthTitle => DisplayFormat.MonthAndYear(SelectedMonth);
+
+    public bool HasNoCostRows => CostRows.Count == 0;
+
+    public bool HasNoAbvRows => AbvRows.Count == 0;
 
     [RelayCommand]
     private void PreviousMonth()

@@ -188,6 +188,9 @@
                         <ContentControl Style="{StaticResource Card}">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Виміри" />
+                                <TextBlock Style="{StaticResource Caption}"
+                                           Text="Вимірів ще немає"
+                                           Visibility="{Binding Details.HasNoMeasurements, Converter={StaticResource BoolToVisibility}}" />
                                 <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
                                           MaxHeight="{StaticResource Height.MeasurementsTable}"
                                           IsReadOnly="True"
