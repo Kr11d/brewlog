@@ -1,4 +1,5 @@
 using BrewLog.Data.BeerXml;
+using BrewLog.Data.Export;
 using BrewLog.Data.Infrastructure;
 using BrewLog.Data.Repositories;
 using BrewLog.Data.Security;
@@ -7,8 +8,11 @@ using BrewLog.Domain.Abstractions;
 using BrewLog.Domain.Services;
 using BrewLog.Domain.Users;
 using BrewLog.UI.Features.Batches;
+using BrewLog.UI.Features.Bottling;
+using BrewLog.UI.Features.Inventory;
 using BrewLog.UI.Features.Measurements;
 using BrewLog.UI.Features.Recipes;
+using BrewLog.UI.Features.Reports;
 using BrewLog.UI.Services;
 
 namespace BrewLog.UI;
@@ -35,9 +39,11 @@ public sealed class AppServices
         Auth = new AuthService(users, PasswordHasher);
         Users = new UserService(users, PasswordHasher, Session, Clock);
         Catalog = new CatalogService(styles, catalog, Session);
-        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, Session, Clock);
+        var batches = new BatchRepository(Connections);
+        Inventory = new InventoryService(new StockRepository(Connections, Clock), catalog, recipes, batches, Session, Clock);
         Recipes = new RecipeService(recipes, catalog, new BeerXmlSerializer(styles), Session, Clock, Inventory);
-        Batches = new BatchService(new BatchRepository(Connections), recipes, styles, Recipes, Inventory, Session, Clock);
+        Batches = new BatchService(batches, recipes, styles, Recipes, Inventory, Session, Clock);
+        Reports = new ReportService(batches, Session);
 
         Dialogs = new DialogService();
         Navigation = new NavigationService(CreatePageFactories());
@@ -67,6 +73,8 @@ public sealed class AppServices
     public RecipeService Recipes { get; }
 
     public BatchService Batches { get; }
+
+    public ReportService Reports { get; }
 
     public DialogService Dialogs { get; }
 
@@ -110,5 +118,8 @@ public sealed class AppServices
         [AppSection.Batches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: false),
         [AppSection.MyBatches] = () => new BatchesViewModel(Batches, Users, Session, Clock, Dialogs, Windows, onlyMine: true),
         [AppSection.Measurements] = () => new MeasurementsViewModel(Batches, Session, Clock, Dialogs, Windows),
+        [AppSection.Bottling] = () => new BottlingPageViewModel(Batches, Clock, Dialogs, Windows),
+        [AppSection.Reports] = () => new ReportsViewModel(Reports, Clock, Dialogs, new ReportExcelExporter(), new ReportPdfExporter()),
+        [AppSection.Inventory] = () => new InventoryViewModel(Inventory, Batches, Catalog, Session, Clock, Dialogs, Windows, new PurchaseOrderPdf(), new StockExcelExporter()),
     };
 }

@@ -20,6 +20,8 @@ public sealed class Malt : Ingredient
 
     public override string Unit => "кг";
 
+    public override string KindDisplayName => "Солод";
+
     /// <summary>Додає екстракт (ефективність діє лише на затерте зерно) і колір (MCU).</summary>
     public override void ApplyTo(RecipeStats stats)
     {

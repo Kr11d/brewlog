@@ -31,6 +31,8 @@
     <DataGridLength x:Key="Column.Person">200</DataGridLength>
     <sys:Double x:Key="Column.MinWide">180</sys:Double>
     <DataGridLength x:Key="Column.Attention">250</DataGridLength>
+    <DataGridLength x:Key="Column.Date">112</DataGridLength>
+    <DataGridLength x:Key="Column.Status">172</DataGridLength>
     <sys:Double x:Key="Row.TwoLines">64</sys:Double>
 
     <Style x:Key="CleanDataGrid.Gripper" TargetType="Thumb">

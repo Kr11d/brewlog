@@ -20,5 +20,7 @@ public sealed class FakeCatalogRepository : InMemoryRepository<Ingredient>, IIng
 
     public IReadOnlyDictionary<int, decimal> GetLastPrices() => LastPrices;
 
-    public IReadOnlyDictionary<int, double> GetMinStocks() => new Dictionary<int, double>();
+    public Dictionary<int, double> MinStocks { get; } = [];
+
+    public IReadOnlyDictionary<int, double> GetMinStocks() => MinStocks;
 }

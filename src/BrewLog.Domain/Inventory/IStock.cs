@@ -8,4 +8,6 @@ public interface IStock
     double AvailableOf(int catalogId, DateTime now);
 
     IReadOnlyList<WriteOffPart> PlanWriteOff(int catalogId, double quantity, DateTime now);
+
+    IEnumerable<StockPosition> Positions(DateTime now);
 }

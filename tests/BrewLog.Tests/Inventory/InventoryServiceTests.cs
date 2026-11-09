@@ -1,3 +1,4 @@
+using BrewLog.Domain.Batches;
 using BrewLog.Domain.Common;
 using BrewLog.Domain.Inventory;
 using BrewLog.Domain.Recipes;
@@ -16,6 +17,47 @@ public sealed class InventoryServiceTests
     private readonly FakeStockRepository _stock = new();
     private readonly FakeCatalogRepository _catalog = new();
     private readonly FakeRecipeRepository _recipes = new();
+    private readonly FakeBatchRepository _batches = new();
+
+    /// <summary>Солод — крок 0,5 кг, хміль — 50 г, дріжджі — 1 пак. Кількість = більша з нестач до мінімуму й до потреби; null — докуповувати нічого.</summary>
+    public static TheoryData<Ingredient, double, double, double, double?> OrderCases => new()
+    {
+        { Pilsner(), 3.0, 5.2, 0.0, 2.5 },
+        { Pilsner(), 3.0, 5.0, 9.1, 6.5 },
+        { BoilHop(), 120.0, 200.0, 160.0, 100.0 },
+        { BoilHop(), 100.0, 120.0, 220.0, 150.0 },
+        { BoilHop(), 100.0, 200.0, 0.0, 100.0 },
+        { Us05(), 1.0, 3.0, 5.2, 5.0 },
+        { Us05(), 1.0, 3.0, 0.0, 2.0 },
+        { Pilsner(), 10.0, 5.0, 8.0, null },
+    };
+
+    /// <summary>Вручну: нестача округлюється вгору до кроку; сума = кількість · 40 грн.</summary>
+    [Theory]
+    [MemberData(nameof(OrderCases))]
+    public void BuildPurchaseOrder_BelowMinimumOrPlannedNeed_RoundsUpLargerShortage(Ingredient ingredient, double available, double minStock, double plannedNeed, double? expected)
+    {
+        var item = AddToCatalog(ingredient);
+        _catalog.MinStocks[item.CatalogId] = minStock;
+        AddLot(item, left: available);
+        if (plannedNeed > 0)
+        {
+            item.Amount = plannedNeed;
+            _batches.Insert(new Batch { RecipeId = _recipes.Insert(RecipeOf(10, item)), VolumeL = 10 });
+        }
+
+        var order = ServiceWith(Permission.ManageStock).BuildPurchaseOrder(null);
+
+        if (expected is { } quantity)
+        {
+            Assert.Equal(quantity, Assert.Single(order.Lines).Quantity, 0.0001);
+            Assert.Equal((decimal)quantity * 40m, order.Total);
+        }
+        else
+        {
+            Assert.Empty(order.Lines);
+        }
+    }
 
     /// <summary>Вручну: k = 100 / 50 = 2; Citra (60 + 100) · 2 = 320 г; солод 12,2 · 2 = 24,4 кг.</summary>
     [Fact]
@@ -119,5 +161,5 @@ public sealed class InventoryServiceTests
     });
 
     private InventoryService ServiceWith(params Permission[] permissions) =>
-        new(_stock, _catalog, _recipes, new FakeSession(null, permissions), new FixedClock(Now));
+        new(_stock, _catalog, _recipes, _batches, new FakeSession(null, permissions), new FixedClock(Now));
 }

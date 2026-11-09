@@ -48,6 +48,8 @@
     <sys:Double x:Key="Size.Step">32</sys:Double>
     <sys:Double x:Key="Height.Chart">240</sys:Double>
     <sys:Double x:Key="Height.MeasurementsTable">280</sys:Double>
+    <sys:Double x:Key="Height.StockTable">440</sys:Double>
+    <sys:Double x:Key="Width.MonthTitle">170</sys:Double>
     <GridLength x:Key="Width.CardSide">480</GridLength>
     <sys:Double x:Key="Height.PickerList">260</sys:Double>
     <sys:Double x:Key="Size.ControlCell">36</sys:Double>

@@ -23,6 +23,8 @@ public sealed class FakeStockRepository : InMemoryRepository<StockLot>, IStockRe
 
     public IReadOnlyList<Supplier> GetSuppliers() => [];
 
+    public int InsertSupplier(Supplier supplier) => supplier.Id;
+
     public int ReceiveLot(StockLot lot, int? userId) => Insert(lot);
 
     public void ApplyWriteOff(IReadOnlyList<WriteOffPart> parts, int batchId, int? userId)

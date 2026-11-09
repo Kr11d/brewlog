@@ -161,7 +161,7 @@ public sealed class BatchServiceTests
     {
         var session = new FakeSession(user, permissions);
         var clock = new FixedClock(Now);
-        var inventory = new InventoryService(_stock, _catalog, _recipes, session, clock);
+        var inventory = new InventoryService(_stock, _catalog, _recipes, _batches, session, clock);
         var recipeService = new RecipeService(_recipes, _catalog, new BeerXmlSerializer(_styles), session, clock, inventory);
         return new BatchService(_batches, _recipes, _styles, recipeService, inventory, session, clock);
     }

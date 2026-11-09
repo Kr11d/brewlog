@@ -76,7 +76,19 @@ public sealed partial class BatchCardViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Package() => _dialogs.ShowInfo("Буде в A9");
+    private void Package()
+    {
+        try
+        {
+            _windows.ShowBottling(_batchId);
+        }
+        catch (DomainException exception)
+        {
+            _dialogs.ShowError(exception.Message);
+        }
+
+        Reload();
+    }
 
     private void Reload()
     {

@@ -1,0 +1,69 @@
+<Window x:Class="BrewLog.UI.Features.Inventory.StockReceiptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Прихід сировини"
+        Style="{StaticResource MessageWindow}">
+    <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Pad.DialogShadow}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionTitle}" Text="Прихід сировини" />
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Позиція (почніть вводити назву)" />
+            <ComboBox Style="{StaticResource InputCombo}"
+                      IsEditable="True"
+                      IsTextSearchEnabled="True"
+                      TextSearch.TextPath="Title"
+                      DisplayMemberPath="Title"
+                      ItemsSource="{Binding Items}"
+                      SelectedItem="{Binding SelectedItem}" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="{StaticResource Gap.Right.8}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="{Binding QuantityLabel}" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding QuantityField}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="{Binding PriceLabel}" />
+                    <TextBox Style="{StaticResource NumberBox}" DataContext="{Binding PriceField}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="Постачальник (оберіть або введіть нового)" />
+            <ComboBox Style="{StaticResource InputCombo}"
+                      IsEditable="True"
+                      ItemsSource="{Binding Suppliers}"
+                      Text="{Binding SupplierText, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="{StaticResource Gap.Right.8}">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Строк придатності" />
+                    <DatePicker Tag="Без строку" SelectedDate="{Binding ExpiresAt}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Style="{StaticResource FieldLabel}" Text="Код партії" />
+                    <TextBox Style="{StaticResource InputBox}" Tag="Необов'язково" Text="{Binding LotCode, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Margin="{StaticResource Gap.Top.24}"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Style="{StaticResource SecondaryButton}"
+                        Margin="{StaticResource Gap.Right.8}"
+                        Content="Скасувати"
+                        IsCancel="True" />
+                <Button Style="{StaticResource PrimaryButton}"
+                        Command="{Binding ConfirmCommand}"
+                        Content="Оформити"
+                        IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </ContentControl>
+</Window>

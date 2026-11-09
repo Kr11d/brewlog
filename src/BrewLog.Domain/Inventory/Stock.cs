@@ -26,6 +26,8 @@ public sealed class Stock<T> : IStock where T : Ingredient
 
     public double AvailableOf(int catalogId, DateTime now) => Find(catalogId)?.Available(now) ?? 0;
 
+    public IEnumerable<StockPosition> Positions(DateTime now) => _entries.Select(entry => entry.ToPosition(now));
+
     /// <summary>
     /// План списання FIFO: спершу партія з найближчим строком, за рівного строку — раніше отримана, партії без строку останні.
     /// Прострочені партії пропускаються. Нічого не змінює; якщо сировини бракує, кидає InsufficientStockException.

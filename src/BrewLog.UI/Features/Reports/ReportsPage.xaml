@@ -1,0 +1,171 @@
+<UserControl x:Class="BrewLog.UI.Features.Reports.ReportsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:BrewLog.UI.Controls"
+             xmlns:scott="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="{StaticResource Gap.Right.8}">
+            <!-- Шапка: місяць і експорт -->
+            <DockPanel Margin="{StaticResource Gap.Bottom.24}">
+                <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Button Style="{StaticResource IconButton}"
+                            Command="{Binding PreviousMonthCommand}"
+                            Content="{StaticResource Glyph.ChevronLeft}"
+                            ToolTip="Попередній місяць" />
+                    <TextBlock Style="{StaticResource Body.Strong}"
+                               Width="{StaticResource Width.MonthTitle}"
+                               VerticalAlignment="Center"
+                               TextAlignment="Center"
+                               Text="{Binding MonthTitle}" />
+                    <Button Style="{StaticResource IconButton}"
+                            Margin="{StaticResource Gap.Right.8}"
+                            Command="{Binding NextMonthCommand}"
+                            Content="{StaticResource Glyph.ChevronRight}"
+                            ToolTip="Наступний місяць" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Margin="{StaticResource Gap.Right.8}"
+                            Command="{Binding ExportExcelCommand}"
+                            Content="Excel" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ExportPdfCommand}"
+                            Content="PDF" />
+                </StackPanel>
+                <TextBlock Style="{StaticResource PageTitle}" Text="Звіти" />
+            </DockPanel>
+
+            <!-- Показники місяця -->
+            <UniformGrid Margin="{StaticResource Gap.Bottom.16}" Rows="1">
+                <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Right.8}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BigNumber}" Text="{Binding BrewedText}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Зварено партій" />
+                    </StackPanel>
+                </ContentControl>
+                <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Right.8}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BigNumber}" Text="{Binding PackagedText}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Розлито, л" />
+                    </StackPanel>
+                </ContentControl>
+                <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Right.8}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BigNumber}" Text="{Binding CostText}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Собівартість, грн/л" />
+                    </StackPanel>
+                </ContentControl>
+                <ContentControl Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource BigNumber}" Text="{Binding AbvDeviationText}" />
+                        <TextBlock Style="{StaticResource Caption}" Text="Відхилення ABV" />
+                    </StackPanel>
+                </ContentControl>
+            </UniformGrid>
+
+            <!-- Обсяг за 12 місяців -->
+            <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Bottom.16}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Обсяг за 12 місяців" />
+                    <scott:WpfPlot x:Name="VolumePlot" Height="{StaticResource Height.Chart}" />
+                </StackPanel>
+            </ContentControl>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <ContentControl Style="{StaticResource Card}" Margin="{StaticResource Gap.Right.8}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Собівартість за рецептами" />
+                        <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
+                                  controls:WheelForwarding.IsEnabled="True"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding CostRows}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Width="*"
+                                                    MinWidth="{StaticResource Column.MinText}"
+                                                    Binding="{Binding RecipeName}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                                    Header="Рецепт" />
+                                <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                                    MinWidth="{StaticResource Column.MinNarrow}"
+                                                    Binding="{Binding BatchCount}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="Партій"
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                                    MinWidth="{StaticResource Column.MinNumber}"
+                                                    Binding="{Binding AverageText}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="Середня"
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
+                                                    SortMemberPath="Average" />
+                                <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                                    MinWidth="{StaticResource Column.MinNumber}"
+                                                    Binding="{Binding MinText}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="Мін."
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                <DataGridTextColumn Width="{StaticResource Column.Number}"
+                                                    MinWidth="{StaticResource Column.MinNumber}"
+                                                    Binding="{Binding MaxText}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="Макс."
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ContentControl>
+
+                <ContentControl Grid.Column="1" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Margin="{StaticResource Gap.Bottom.8}" Text="Планова та фактична міцність" />
+                        <DataGrid Style="{StaticResource CleanDataGrid.Flat}"
+                                  controls:WheelForwarding.IsEnabled="True"
+                                  IsReadOnly="True"
+                                  ItemsSource="{Binding AbvRows}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Width="{StaticResource Column.Wide}"
+                                                    Binding="{Binding Number}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                                    Header="Партія" />
+                                <DataGridTextColumn Width="*"
+                                                    MinWidth="{StaticResource Column.MinText}"
+                                                    Binding="{Binding RecipeName}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Text}"
+                                                    Header="Рецепт" />
+                                <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                                    MinWidth="{StaticResource Column.MinNarrow}"
+                                                    Binding="{Binding PlannedText}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="План"
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                <DataGridTextColumn Width="{StaticResource Column.Narrow}"
+                                                    MinWidth="{StaticResource Column.MinNarrow}"
+                                                    Binding="{Binding ActualText}"
+                                                    ElementStyle="{StaticResource CleanDataGrid.Number}"
+                                                    Header="Факт"
+                                                    HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}" />
+                                <DataGridTemplateColumn Width="{StaticResource Column.Number}"
+                                                        MinWidth="{StaticResource Column.MinNumber}"
+                                                        Header="Різниця"
+                                                        HeaderStyle="{StaticResource CleanDataGrid.NumberHeader}"
+                                                        SortMemberPath="Difference">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource CleanDataGrid.Number}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{Binding DifferenceBrush, Converter={StaticResource ResourceByKey}}"
+                                                       Text="{Binding DifferenceText}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ContentControl>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
