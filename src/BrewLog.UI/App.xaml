@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:batches="clr-namespace:BrewLog.UI.Features.Batches"
              xmlns:common="clr-namespace:BrewLog.UI.Features.Common"
+             xmlns:measurements="clr-namespace:BrewLog.UI.Features.Measurements"
              xmlns:recipes="clr-namespace:BrewLog.UI.Features.Recipes">
     <Application.Resources>
         <ResourceDictionary>
@@ -22,6 +23,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type batches:BatchesViewModel}">
                 <batches:BatchesPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type measurements:MeasurementsViewModel}">
+                <measurements:MeasurementsPage />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

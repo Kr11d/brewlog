@@ -7,8 +7,8 @@
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
             <StackPanel Margin="{StaticResource Gap.Right.8}">
                 <TextBlock Style="{StaticResource FieldLabel}" Text="Дата" />
