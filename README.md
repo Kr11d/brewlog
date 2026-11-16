@@ -199,7 +199,7 @@ dotnet test --collect:"XPlat Code Coverage"
 | 2 | Обробники, ≥ 10 | 81 (56 команд, 19 підписок, 6 подій у XAML) | 34 | 47 |
 | 2 | Логіка окремо від GUI | шари Domain, Data, UI | обидва | обидва |
 | 3 | Зовнішні бібліотеки | 7, розділ «Бібліотеки» | ScottPlot, QuestPDF, ClosedXML | інфраструктура й BCrypt |
-| 3 | Ретроспектива | `docs/RETRO.md` | сесії 1–2 і далі | сесії 1–4 |
+| 3 | Ретроспектива | `docs/RETRO.md`, звіти за бібліотеками | сесії 1–3, звіт про QuestPDF | сесії 1–4, звіт про CommunityToolkit.Mvvm |
 
 ## Документація
 
@@ -209,6 +209,11 @@ dotnet test --collect:"XPlat Code Coverage"
 ## Ретроспектива
 
 Запис кожної робочої сесії: що зроблено, які були проблеми й що змінилось у плані — [`docs/RETRO.md`](docs/RETRO.md).
+
+Звіти ЛР 3 з відповідями на питання про бібліотеки:
+
+- [CommunityToolkit.Mvvm](docs/lab3-communitytoolkit-mvvm.md) — Білоцерковець Владислав
+- [QuestPDF](docs/lab3-questpdf.md) — Чишкала Максим
 
 ## Автори
 
